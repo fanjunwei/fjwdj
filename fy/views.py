@@ -22,6 +22,8 @@ from django.contrib.auth import logout as auth_logout
 from fy_query import *
 # Create your views here.
 
+def home(request):
+    return TemplateResponse(request, 'home.html', locals())
 
 def moneySupply(request):
     res = []
