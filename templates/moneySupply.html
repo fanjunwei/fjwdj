@@ -79,56 +79,57 @@
 </head>
 <body>
 <div id="content">
-<h1 style="text-align: center">资金配比查询</h1>
-<br>
-<table class="table1">
-<thead>
+    <h1 style="text-align: center">资金配比查询</h1>
+    <br>
+    <table class="table1">
+        <thead>
 
-    <tr>
-        <th>名称</th>
-        <th>资金比例</th>
-        <th>资金需求委托总量</th>
-        <th>资金受托申报总量</th>
-        <th>指导价</th>
-        <th>委托受托价</th>
-    </tr>
-    </thead>
-    {% for i in res %}
         <tr>
-            <td>{{ i.name|default_if_none:'' }}</td>
+            <th>名称</th>
+            <th>资金比例</th>
+            <th>资金需求委托总量</th>
+            <th>资金受托申报总量</th>
+            <th>指导价</th>
+            <th>委托受托价</th>
+        </tr>
+        </thead>
+        {% for i in res %}
+            <tr>
+                <td>{{ i.name|default_if_none:'' }}</td>
+                <td>
+                    <div style='text-align:right;'>
+                        {{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</div>
+                </td>
+                <td>
+                    <div style='text-align:right;'>{{ i.moneySupplyRequested|default_if_none:'' }}</div>
+                </td>
+                <td>
+                    <div style='text-align:right;'>{{ i.moneySupply|default_if_none:'' }}</div>
+                </td>
+                <td>
+                    <div style='text-align:right;'>{{ i.recommendation|default_if_none:'' }}</div>
+                </td>
+                <td>
+                    <div style='text-align:right;'>{{ i.financePrice|default_if_none:'' }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <table>
+        <tr>
+            <td>总委托资金(亿元):</td>
             <td>
-                <div style='text-align:right;'>{{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</div>
-            </td>
-            <td>
-                <div style='text-align:right;'>{{ i.moneySupplyRequested|default_if_none:'' }}</div>
-            </td>
-            <td>
-                <div style='text-align:right;'>{{ i.moneySupply|default_if_none:'' }}</div>
-            </td>
-            <td>
-                <div style='text-align:right;'>{{ i.recommendation|default_if_none:'' }}</div>
-            </td>
-            <td>
-                <div style='text-align:right;'>{{ i.financePrice|default_if_none:'' }}</div>
+                <div style='text-align:right;'>{{ mf1|default_if_none:'' }}</div>
             </td>
         </tr>
-    {% endfor %}
-</table>
-<br>
-<table>
-    <tr>
-        <td>总委托资金(亿元):</td>
-        <td>
-            <div style='text-align:right;'>{{ mf1|default_if_none:'' }}</div>
-        </td>
-    </tr>
-    <tr>
-        <td>总受托资金(亿元):</td>
-        <td>
-            <div style='text-align:right;'>{{ mf2|default_if_none:'' }}</div>
-        </td>
-    </tr>
-</table>
+        <tr>
+            <td>总受托资金(亿元):</td>
+            <td>
+                <div style='text-align:right;'>{{ mf2|default_if_none:'' }}</div>
+            </td>
+        </tr>
+    </table>
 
 </div>
 </body>
