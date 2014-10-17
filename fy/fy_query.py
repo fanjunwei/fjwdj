@@ -22,34 +22,50 @@ def getMoneyInfo(goodsId):
     moneySupply = js['params'].get('moneySupply', None)
 
     if moneySupplyRequested and moneySupply and float(moneySupply) != 0:
-        ratio = float(moneySupplyRequested) / float(moneySupply)*100
+        ratio = float(moneySupplyRequested) / float(moneySupply) * 100
     else:
         ratio = None
     conn.close()
     recommendation = js['params'].get('recommendation', None)
     financePrice = js['params'].get('financePrice', None)
     if recommendation and financePrice:
-        mini = min(float(recommendation), float(financePrice))/100.0
+        mini = min(float(recommendation), float(financePrice)) / 100.0
     elif recommendation:
-        mini = float(recommendation)/100.0
+        mini = float(recommendation) / 100.0
     elif financePrice:
-        mini = float(financePrice)/100.0
+        mini = float(financePrice) / 100.0
     else:
         mini = 0
 
     res['name'] = GoodsIds.get(goodsId, '') + goodsId
-    res['moneySupplyRequested'] = moneySupplyRequested
-    res['moneySupply'] = moneySupply
+    if moneySupplyRequested:
+        res['moneySupplyRequested'] = format(int(moneySupplyRequested), ',')
+    else:
+        res['moneySupplyRequested'] = None
+    if moneySupply:
+        res['moneySupply'] = format(int(moneySupply), ',')
+    else:
+        res['moneySupply'] = None
+    if ratio:
+        res['ratio'] = format(float(ratio) * 100, ',.2f')
+    else:
+        res['ratio'] = None
+    if recommendation:
+        res['recommendation'] = format(float(recommendation) / 100.0, ',.2f')
+    else:
+        res['recommendation'] = None
+    if financePrice:
+        res['financePrice'] = format(float(financePrice) / 100.0, ',.2f')
+    else:
+        res['financePrice'] = None
 
-    res['ratio'] = ratio
-    res['recommendation'] = recommendation
-    res['financePrice'] = financePrice
     if moneySupplyRequested:
         res['m1'] = int(moneySupplyRequested) * mini
     else:
         res['m1'] = 0
-    if financePrice:
-        res['m2'] = int(financePrice) * mini
+
+    if moneySupply:
+        res['m2'] = int(moneySupply) * mini
     else:
         res['m2'] = 0
     return res

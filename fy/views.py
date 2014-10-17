@@ -25,6 +25,7 @@ from fy_query import *
 def home(request):
     return TemplateResponse(request, 'home.html', locals())
 
+
 def moneySupply(request):
     res = []
     moneySupplyRequestedTotal = 0
@@ -37,4 +38,6 @@ def moneySupply(request):
             moneySupplyTotal += int(googdsInfo['m2'])
         res.append(googdsInfo)
     res.sort(GoodsCMP)
+    mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
+    mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
     return TemplateResponse(request, 'moneySupply.html', locals())

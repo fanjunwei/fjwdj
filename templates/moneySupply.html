@@ -34,7 +34,7 @@
     {% for i in res %}
         <tr>
             <td>{{ i.name|default_if_none:'' }}</td>
-            <td>{{ i.ratio|floatformat:-2|default_if_none:'' }}{% if i.ratio %}%{% endif %}</td>
+            <td>{{ i.ratio|default_if_none:'' }}{% if i.ratio %}%{% endif %}</td>
             <td>{{ i.moneySupplyRequested|default_if_none:'' }}</td>
             <td>{{ i.moneySupply|default_if_none:'' }}</td>
             <td>{{ i.recommendation|default_if_none:'' }}</td>
@@ -44,8 +44,8 @@
 </table>
 <br>
 <table>
-    <tr><td>总委托资金</td><td>{{ moneySupplyRequestedTotal }}</td></tr>
-    <tr><td>总受托资金</td><td>{{ moneySupplyTotal }}</td></tr>
+    <tr><td>总委托资金(亿元)</td><td>{{ mf1|default_if_none:'' }}</td></tr>
+    <tr><td>总受托资金(亿元)</td><td>{{ mf2|default_if_none:'' }}</td></tr>
 </table>
 
 
