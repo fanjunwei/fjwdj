@@ -31,12 +31,15 @@ def moneySupply(request):
     moneySupplyRequestedTotal = 0
     moneySupplyTotal = 0
     for k, v in GoodsIds.items():
-        googdsInfo = getMoneyInfo(k)
-        if googdsInfo['moneySupplyRequested']:
-            moneySupplyRequestedTotal += int(googdsInfo['m1'])
-        if googdsInfo['moneySupply']:
-            moneySupplyTotal += int(googdsInfo['m2'])
-        res.append(googdsInfo)
+        try:
+            googdsInfo = getMoneyInfo(k)
+            if googdsInfo['moneySupplyRequested']:
+                moneySupplyRequestedTotal += int(googdsInfo['m1'])
+            if googdsInfo['moneySupply']:
+                moneySupplyTotal += int(googdsInfo['m2'])
+            res.append(googdsInfo)
+        except Exception:
+            pass
     res.sort(GoodsCMP)
     mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
     mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
