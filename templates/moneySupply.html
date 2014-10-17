@@ -34,18 +34,38 @@
     {% for i in res %}
         <tr>
             <td>{{ i.name|default_if_none:'' }}</td>
-            <td>{{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</td>
-            <td>{{ i.moneySupplyRequested|default_if_none:'' }}</td>
-            <td>{{ i.moneySupply|default_if_none:'' }}</td>
-            <td>{{ i.recommendation|default_if_none:'' }}</td>
-            <td>{{ i.financePrice|default_if_none:'' }}</td>
+            <td>
+                <div style='text-align:right;'>{{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</div>
+            </td>
+            <td>
+                <div style='text-align:right;'>{{ i.moneySupplyRequested|default_if_none:'' }}</div>
+            </td>
+            <td>
+                <div style='text-align:right;'>{{ i.moneySupply|default_if_none:'' }}</div>
+            </td>
+            <td>
+                <div style='text-align:right;'>{{ i.recommendation|default_if_none:'' }}</div>
+            </td>
+            <td>
+                <div style='text-align:right;'>{{ i.financePrice|default_if_none:'' }}</div>
+            </td>
         </tr>
     {% endfor %}
 </table>
 <br>
 <table>
-    <tr><td>总委托资金(亿元)</td><td>{{ mf1|default_if_none:'' }}</td></tr>
-    <tr><td>总受托资金(亿元)</td><td>{{ mf2|default_if_none:'' }}</td></tr>
+    <tr>
+        <td>总委托资金(亿元)</td>
+        <td>
+            <div style='text-align:right;'>{{ mf1|default_if_none:'' }}</div>
+        </td>
+    </tr>
+    <tr>
+        <td>总受托资金(亿元)</td>
+        <td>
+            <div style='text-align:right;'>{{ mf2|default_if_none:'' }}</div>
+        </td>
+    </tr>
 </table>
 
 
