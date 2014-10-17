@@ -34,7 +34,7 @@
     {% for i in res %}
         <tr>
             <td>{{ i.name|default_if_none:'' }}</td>
-            <td>{{ i.ratio|default_if_none:'' }}{% if i.ratio %}%{% endif %}</td>
+            <td>{{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</td>
             <td>{{ i.moneySupplyRequested|default_if_none:'' }}</td>
             <td>{{ i.moneySupply|default_if_none:'' }}</td>
             <td>{{ i.recommendation|default_if_none:'' }}</td>

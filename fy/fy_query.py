@@ -46,10 +46,11 @@ def getMoneyInfo(goodsId):
         res['moneySupply'] = format(int(moneySupply), ',')
     else:
         res['moneySupply'] = None
+    res['ratio'] = ratio
     if ratio:
-        res['ratio'] = format(float(ratio) * 100, ',.2f')
+        res['ratio_format'] = format(float(ratio), ',.2f')
     else:
-        res['ratio'] = None
+        res['ratio_format'] = None
     if recommendation:
         res['recommendation'] = format(float(recommendation) / 100.0, ',.2f')
     else:
