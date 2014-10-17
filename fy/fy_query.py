@@ -37,7 +37,8 @@ def getMoneyInfo(goodsId):
     else:
         mini = 0
 
-    res['name'] = GoodsIds.get(goodsId, '') + goodsId
+    res['name'] = GoodsIds.get(goodsId, '')
+    res['id']=goodsId
     if moneySupplyRequested:
         res['moneySupplyRequested'] = format(int(moneySupplyRequested), ',')
     else:

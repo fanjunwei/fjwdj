@@ -2,6 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
     <link href="{{ STATIC_URL }}css/style.css" rel="stylesheet">
     <title>资金配比</title>
     <style type="text/css">
@@ -75,6 +76,11 @@
             color: #aaa;
             text-shadow: 1px 1px 1px #fff;
         }
+
+        .nobreak {
+            word-break: keep-all;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -85,17 +91,17 @@
         <thead>
 
         <tr>
-            <th>名称</th>
-            <th>资金比例</th>
-            <th>资金需求委托总量</th>
-            <th>资金受托申报总量</th>
-            <th>指导价</th>
-            <th>委托受托价</th>
+            <th class="nobreak">名称</th>
+            <th class="nobreak">资金比例</th>
+            <th class="nobreak">资金需求委托总量</th>
+            <th class="nobreak">资金受托申报总量</th>
+            <th class="nobreak">指导价</th>
+            <th class="nobreak">委托受托价</th>
         </tr>
         </thead>
         {% for i in res %}
             <tr>
-                <td>{{ i.name|default_if_none:'' }}</td>
+                <td class="nobreak">{{ i.id|default_if_none:'' }}<br>{{ i.name|default_if_none:'' }}</td>
                 <td>
                     <div style='text-align:right;'>
                         {{ i.ratio_format|default_if_none:'' }}{% if i.ratio %}%{% endif %}</div>
