@@ -29,9 +29,6 @@ YUNMAI_USERNAME = 'test141001'
 YUNMAI_PASSWORD = 'asdg23sdgsuUILo878sdsdf'
 YUNMAI_URL = 'http://eng.ccyunmai.com:5008/SrvEngine'
 
-appID = 'wxe6b9104cf8fdb1d8'
-appsecret = 'c0e208c32da2f2c5c7d78f1e06670835'
-
 
 def handleRequest(request):
     if request.method == 'GET':
