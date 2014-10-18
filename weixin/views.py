@@ -36,13 +36,21 @@ appsecret = 'c0e208c32da2f2c5c7d78f1e06670835'
 def handleRequest(request):
     if request.method == 'GET':
         # response = HttpResponse(request.GET['echostr'],content_type="text/plain")
-        response = HttpResponse(checkSignature(request), content_type="text/plain")
+        echoStr = request.GET.get("echostr", None)
+        if checkSignature(request):
+            response = HttpResponse(echoStr, content_type="text/plain")
+        else:
+            response = HttpResponse(None, content_type="text/plain")
         return response
     elif request.method == 'POST':
         # c = RequestContext(request,{'result':responseMsg(request)})
         # t = Template('{{result}}')
         # response = HttpResponse(t.render(c),content_type="application/xml")
-        response = HttpResponse(responseMsg(request), content_type="application/xml")
+        if checkSignature(request):
+            response = HttpResponse(responseMsg(request), content_type="application/xml")
+        else:
+            response = HttpResponse(None, content_type="application/xml")
+
         return response
     else:
         return None
@@ -53,7 +61,7 @@ def checkSignature(request):
     signature = request.GET.get("signature", None)
     timestamp = request.GET.get("timestamp", None)
     nonce = request.GET.get("nonce", None)
-    echoStr = request.GET.get("echostr", None)
+
 
     token = TOKEN
     tmpList = [token, timestamp, nonce]
@@ -61,9 +69,9 @@ def checkSignature(request):
     tmpstr = "%s%s%s" % tuple(tmpList)
     tmpstr = hashlib.sha1(tmpstr).hexdigest()
     if tmpstr == signature:
-        return echoStr
+        return True
     else:
-        return None
+        return False
 
 
 def responseMsg(request):
