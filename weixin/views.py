@@ -1,6 +1,6 @@
 # coding=utf-8
 # Date:2014/9/24
-#Email:wangjian2254@gmail.com
+# Email:wangjian2254@gmail.com
 import httplib
 import json, base64
 import uuid
@@ -29,16 +29,19 @@ YUNMAI_USERNAME = 'test141001'
 YUNMAI_PASSWORD = 'asdg23sdgsuUILo878sdsdf'
 YUNMAI_URL = 'http://eng.ccyunmai.com:5008/SrvEngine'
 
+appID = 'wxe6b9104cf8fdb1d8'
+appsecret = 'c0e208c32da2f2c5c7d78f1e06670835'
+
 
 def handleRequest(request):
     if request.method == 'GET':
-        #response = HttpResponse(request.GET['echostr'],content_type="text/plain")
+        # response = HttpResponse(request.GET['echostr'],content_type="text/plain")
         response = HttpResponse(checkSignature(request), content_type="text/plain")
         return response
     elif request.method == 'POST':
-        #c = RequestContext(request,{'result':responseMsg(request)})
-        #t = Template('{{result}}')
-        #response = HttpResponse(t.render(c),content_type="application/xml")
+        # c = RequestContext(request,{'result':responseMsg(request)})
+        # t = Template('{{result}}')
+        # response = HttpResponse(t.render(c),content_type="application/xml")
         response = HttpResponse(responseMsg(request), content_type="application/xml")
         return response
     else:
@@ -65,7 +68,7 @@ def checkSignature(request):
 
 def responseMsg(request):
     rawStr = smart_str(request.body)
-    #rawStr = smart_str(request.POST['XML'])
+    # rawStr = smart_str(request.POST['XML'])
     msg = paraseMsgXml(ET.fromstring(rawStr))
     msgtype = msg.get('MsgType')
     content = msg.get('Content', '')
@@ -73,7 +76,18 @@ def responseMsg(request):
     fuid = msg['FromUserName']
     result_msg = u'test'
 
-    return getReplyXml(msg, result_msg.encode('utf-8'))
+    items = []
+    item1 = {'Title': u'测试新闻', 'Description': u'新闻内容',
+             'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
+             'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
+    item2 = {'Title': u'测试新闻1', 'Description': u'新闻内容12',
+             'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
+             'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
+    items.append(item1)
+    # items.append(item2)
+    text = getReplyXmlNews(msg, items)
+    return text
+    #return getReplyXml(msg, result_msg.encode('utf-8'))
 
 
 def paraseMsgXml(rootElem):
@@ -85,28 +99,90 @@ def paraseMsgXml(rootElem):
 
 
 def getReplyXml(msg, replyContent):
-    extTpl = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%s</CreateTime><MsgType><![CDATA[%s]]></MsgType><Content><![CDATA[%s]]></Content><FuncFlag>0</FuncFlag></xml>";
-    extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 'text', replyContent)
-    return extTpl
+    # extTpl = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%s</CreateTime><MsgType><![CDATA[%s]]></MsgType><Content><![CDATA[%s]]></Content><FuncFlag>0</FuncFlag></xml>";
+    # extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 'text', replyContent)
+    tree = ET.fromstring('<xml></xml>')
+    ToUserName = ET.Element('ToUserName')
+    ToUserName.text = msg['FromUserName']
+    tree.append(ToUserName)
 
-def getReplyXmlImg(msg, replyContent,url=''):
-    extTpl='''<xml>
-<ToUserName><![CDATA[%s]]></ToUserName>
-<FromUserName><![CDATA[%s]]></FromUserName>
-<CreateTime>%s</CreateTime>
-<MsgType><![CDATA[news]]></MsgType>
-<ArticleCount>1</ArticleCount>
-<Articles>
-<item>
-<Title><![CDATA[手机号实名]]></Title>
-<Description><![CDATA[%s]]></Description>
-<PicUrl><![CDATA[%s]]></PicUrl>
-<Url><![CDATA[]]></Url>
-</item>
-</Articles>
-</xml> '''
-    extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), replyContent, url)
-    return extTpl
+    FromUserName = ET.Element('FromUserName')
+    FromUserName.text = msg['ToUserName']
+    tree.append(FromUserName)
+
+    CreateTime = ET.Element('CreateTime')
+    CreateTime.text = str(int(time.time()))
+    tree.append(CreateTime)
+
+    MsgType = ET.Element('MsgType')
+    MsgType.text = 'text'
+    tree.append(MsgType)
+
+    Content = ET.Element('Content')
+    Content.text = replyContent
+    tree.append(Content)
+
+    return ET.tostring(tree, 'utf8')
+
+
+def getReplyXmlNews(msg, items):
+    # extTpl = '''<xml>
+    # <ToUserName><![CDATA[%s]]></ToUserName>
+    # <FromUserName><![CDATA[%s]]></FromUserName>
+    # <CreateTime>%s</CreateTime>
+    # <MsgType><![CDATA[news]]></MsgType>
+    # <ArticleCount>1</ArticleCount>
+    # <Articles>
+    # <item>
+    # <Title><![CDATA[手机号实名]]></Title>
+    # <Description><![CDATA[%s]]></Description>
+    # <PicUrl><![CDATA[%s]]></PicUrl>
+    # <Url><![CDATA[]]></Url>
+    # </item>
+    # </Articles>
+    # </xml> '''
+    # extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), replyContent, url)
+    # return extTpl
+    tree = ET.fromstring('<xml></xml>')
+    tree.append(getTextElement('ToUserName', msg['FromUserName']))
+    tree.append(getTextElement('FromUserName', msg['ToUserName']))
+    tree.append(getTextElement('CreateTime', str(int(time.time()))))
+    tree.append(getTextElement('MsgType', 'news'))
+    tree.append(getTextElement('ArticleCount', str(len(items))))
+    Articles = ET.Element('Articles')
+    for i in items:
+        Articles.append(getNewsElement(i))
+    tree.append(Articles)
+    return ET.tostring(tree, 'utf8')
+
+
+def getTextElement(tag, text):
+    element = ET.Element(tag)
+    element.text = text
+    return element
+
+
+def getNewsElement(item):
+    element = ET.fromstring('<item></item>')
+
+    ETitle = ET.Element('Title')
+    ETitle.text = item.get('Title', '')
+    element.append(ETitle)
+
+    EDescription = ET.Element('Description')
+    EDescription.text = item.get('Description', '')
+    element.append(EDescription)
+
+    EPicUrl = ET.Element('PicUrl')
+    EPicUrl.text = item.get('PicUrl', '')
+    element.append(EPicUrl)
+
+    EUrl = ET.Element('Url')
+    EUrl.text = item.get('Url', '')
+    element.append(EUrl)
+
+    return element
+
 
 def eventMsg(msg):
     eventtype = msg.get('Event')
@@ -124,15 +200,15 @@ def eventMsg(msg):
 
 
 # def downloadIDimage(url, trueid):
-#     import os,uuid
-#     try:
-#         f = urllib2.urlopen(url)
-#         data = f.read()
-#         filename = str(uuid.uuid4())
-#         with open("%s/%s" % (os.path.join(MEDIA_ROOT, "idimg"), filename), "wb") as code:
-#             code.write(data)
-#         truename = Truename.objects.get(pk=trueid)
-#         if truename.idstatus < 2:
+# import os,uuid
+# try:
+# f = urllib2.urlopen(url)
+# data = f.read()
+# filename = str(uuid.uuid4())
+# with open("%s/%s" % (os.path.join(MEDIA_ROOT, "idimg"), filename), "wb") as code:
+# code.write(data)
+# truename = Truename.objects.get(pk=trueid)
+# if truename.idstatus < 2:
 #             truename.imgfile = '%s/%s'%('idimg', filename)
 #             truename.idstatus = 2
 #             truename.save()
