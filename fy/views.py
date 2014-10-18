@@ -20,6 +20,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from fy_query import *
+
 # Create your views here.
 
 def home(request):
