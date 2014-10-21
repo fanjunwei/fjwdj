@@ -94,6 +94,7 @@ def responseMsg(request):
     # return text
     #return getReplyXml(msg, result_msg)
     helperText = u'''平台测试中
+QQ：81300697
 回复1：获取泛亚有色金属最新资金配比情况'''
     if msgtype == 'text':
         if content == '1':

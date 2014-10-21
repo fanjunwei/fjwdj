@@ -100,10 +100,15 @@ def getFyMoneySupply():
     mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
     mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
     out=[]
-    for i in res:
-        out.append('%s%s：%s%%'%(i.get('name',''),i.get('id',''),i.get('ratio_format','')))
-    out.append('总委托资金：%s亿'%mf1)
-    out.append('总受托资金：%s亿'%mf2)
+    if moneySupplyRequestedTotal<=0 or moneySupplyTotal<=0:
+        out.append('数据异常,请在交易时间获取')
+        out.append('委托受托申报时间：工作日09:00—11:30；13:30—16:15')
+    else:
+        for i in res:
+            out.append('%s%s：%s%%'%(i.get('name',''),i.get('id',''),i.get('ratio_format','')))
+        out.append('总委托资金：%s亿'%mf1)
+        out.append('总受托资金：%s亿'%mf2)
+
     return '\n'.join(out)
 
 
