@@ -44,4 +44,8 @@ def moneySupply(request):
     res.sort(GoodsCMP)
     mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
     mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
+    if moneySupplyRequestedTotal <= 0 or moneySupplyTotal <= 0:
+        dataError = True
+    else:
+        dataError = False
     return TemplateResponse(request, 'moneySupply.html', locals())
