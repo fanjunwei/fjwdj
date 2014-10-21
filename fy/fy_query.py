@@ -101,7 +101,7 @@ def getFyMoneySupply():
     mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
     out=[]
     for i in res:
-        out.append('%s%s,%s%%'%(i.get('name',''),i.get('id',''),i.get('ratio_format','')))
+        out.append('%s%s：%s%%'%(i.get('name',''),i.get('id',''),i.get('ratio_format','')))
     out.append('总委托资金：%s亿'%mf1)
     out.append('总受托资金：%s亿'%mf2)
     return '\n'.join(out)
