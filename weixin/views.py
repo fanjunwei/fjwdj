@@ -5,7 +5,8 @@ import httplib
 import json, base64
 import uuid
 from django.contrib.auth.models import User
-
+from django.core.cache import cache
+from fy.fy_query import GoodsIds, getMoneyInfo, GoodsCMP
 
 __author__ = u'王健'
 
@@ -59,7 +60,6 @@ def checkSignature(request):
     timestamp = request.GET.get("timestamp", None)
     nonce = request.GET.get("nonce", None)
 
-
     token = TOKEN
     tmpList = [token, timestamp, nonce]
     tmpList.sort()
@@ -79,20 +79,30 @@ def responseMsg(request):
     content = msg.get('Content', '')
     picurl = msg.get('PicUrl', '')
     fuid = msg['FromUserName']
-    result_msg = u'test'
+    result_msg = u'test\n我'
 
-    items = []
-    item1 = {'Title': u'测试新闻', 'Description': u'新闻内容',
-             'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
-             'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
-    item2 = {'Title': u'测试新闻1', 'Description': u'新闻内容12',
-             'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
-             'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
-    items.append(item1)
-    # items.append(item2)
-    text = getReplyXmlNews(msg, items)
-    return text
-    #return getReplyXml(msg, result_msg.encode('utf-8'))
+    # items = []
+    # item1 = {'Title': u'测试新闻', 'Description': u'新闻内容',
+    # 'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
+    # 'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
+    # item2 = {'Title': u'测试新闻1', 'Description': u'新闻内容12',
+    #          'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
+    #          'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
+    # items.append(item1)
+    # # items.append(item2)
+    # text = getReplyXmlNews(msg, items)
+    # return text
+    #return getReplyXml(msg, result_msg)
+    helperText = u'''平台测试中
+回复1：获取泛亚有色金属最新资金配比情况'''
+    if msgtype == 'text':
+        if content == '1':
+            try:
+                return getReplyXml(msg, cache.get('FyMoneySupply'))
+            except Exception,e:
+                print str(e)
+
+    return getReplyXml(msg, helperText)
 
 
 def paraseMsgXml(rootElem):
@@ -214,8 +224,8 @@ def eventMsg(msg):
 # code.write(data)
 # truename = Truename.objects.get(pk=trueid)
 # if truename.idstatus < 2:
-#             truename.imgfile = '%s/%s'%('idimg', filename)
-#             truename.idstatus = 2
+# truename.imgfile = '%s/%s'%('idimg', filename)
+# truename.idstatus = 2
 #             truename.save()
 #         return True
 #     except Exception,e:

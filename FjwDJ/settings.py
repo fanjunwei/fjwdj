@@ -63,7 +63,19 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
+CACHES = {
+    'default': {
+        #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+        'TIMEOUT': 60 * 15,
+        'KEY_PREFIX':'fjw_dj',
+        'OPTIONS': {
+            'MAX_ENTRIES': 2000,
+            'CULL_FREQUENCY': 2,
+        }
+    }
+}
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 

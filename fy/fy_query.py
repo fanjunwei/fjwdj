@@ -51,7 +51,7 @@ def getMoneyInfo(goodsId):
     if ratio:
         res['ratio_format'] = format(float(ratio), ',.2f')
     else:
-        res['ratio_format'] = None
+        res['ratio_format'] = ''
     if recommendation:
         res['recommendation'] = format(float(recommendation) / 100.0, ',.2f')
     else:
@@ -81,6 +81,35 @@ def GoodsCMP(v1, v2):
     if v2['ratio']:
         r2 = v2['ratio']
     return -cmp(r1, r2)
+
+def getFyMoneySupply():
+    res = []
+    moneySupplyRequestedTotal = 0
+    moneySupplyTotal = 0
+    for k, v in GoodsIds.items():
+        try:
+            googdsInfo = getMoneyInfo(k)
+            if googdsInfo['moneySupplyRequested']:
+                moneySupplyRequestedTotal += int(googdsInfo['m1'])
+            if googdsInfo['moneySupply']:
+                moneySupplyTotal += int(googdsInfo['m2'])
+            res.append(googdsInfo)
+        except Exception:
+            pass
+    res.sort(GoodsCMP)
+    mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
+    mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
+    out=[]
+    for i in res:
+        out.append('%s%s,%s%%'%(i.get('name',''),i.get('id',''),i.get('ratio_format','')))
+    out.append('总委托资金：%s亿'%mf1)
+    out.append('总受托资金：%s亿'%mf2)
+    return '\n'.join(out)
+
+
+if __name__=='__main__':
+    test=getFyMoneySupply()
+    print test
 
 
 
