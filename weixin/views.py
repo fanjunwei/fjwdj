@@ -6,7 +6,7 @@ import json, base64
 import uuid
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from fy.fy_query import GoodsIds, getMoneyInfo, GoodsCMP
+from fy.fy_query import GoodsIds, getMoneyInfo, GoodsCMP, getFyMoneySupply
 
 __author__ = u'王健'
 
@@ -86,7 +86,7 @@ def responseMsg(request):
     # 'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
     # 'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
     # item2 = {'Title': u'测试新闻1', 'Description': u'新闻内容12',
-    #          'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
+    # 'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
     #          'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
     # items.append(item1)
     # # items.append(item2)
@@ -99,8 +99,8 @@ QQ：81300697
     if msgtype == 'text':
         if content == '1':
             try:
-                return getReplyXml(msg, cache.get('FyMoneySupply'))
-            except Exception,e:
+                return getReplyXml(msg, getFyMoneySupply().decode('utf8'))
+            except Exception, e:
                 print str(e)
 
     return getReplyXml(msg, helperText)
@@ -227,7 +227,7 @@ def eventMsg(msg):
 # if truename.idstatus < 2:
 # truename.imgfile = '%s/%s'%('idimg', filename)
 # truename.idstatus = 2
-#             truename.save()
+# truename.save()
 #         return True
 #     except Exception,e:
 #         return False

@@ -17,4 +17,4 @@ def cacheFyMoneySupply():
     cache.set('FyMoneySupply', getFyMoneySupply().decode('utf8'))
 
 
-thread.start_new_thread(task, ())
+#thread.start_new_thread(task, ())
