@@ -1,51 +1,30 @@
 # coding=utf-8
 # Date:2014/9/24
 # Email:wangjian2254@gmail.com
-import httplib
-import json, base64
-import uuid
-from django.contrib.auth.models import User
+
 from django.core.cache import cache
-from fy.fy_query import GoodsIds, getMoneyInfo, GoodsCMP, getFyMoneySupply
-
-__author__ = u'王健'
-
+from fy.fy_query import getFyMoneySupply
+from wechat_sdk import WechatBasic
 from django.http import HttpResponse
-from django.template import RequestContext, Template
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.encoding import smart_str, smart_unicode
-
-import xml.etree.ElementTree as ET
-import urllib, urllib2, time, hashlib
 
 TOKEN = "pibgrj1409810714"
 
-HANWANG_KEY = '3b1c7302-4d31-4c56-b034-94b48e59dd5d'
-
-YOUDAO_KEY = '你申请到的有道的Key'
-YOUDAO_KEY_FROM = "有道的key-from"
-YOUDAO_DOC_TYPE = "xml"
-
-YUNMAI_USERNAME = 'test141001'
-YUNMAI_PASSWORD = 'asdg23sdgsuUILo878sdsdf'
-YUNMAI_URL = 'http://eng.ccyunmai.com:5008/SrvEngine'
-
 
 def handleRequest(request):
+    signature = request.GET.get("signature", None)
+    timestamp = request.GET.get("timestamp", None)
+    nonce = request.GET.get("nonce", None)
+    wechat = WechatBasic(token=TOKEN)
     if request.method == 'GET':
-        # response = HttpResponse(request.GET['echostr'],content_type="text/plain")
         echoStr = request.GET.get("echostr", None)
-        if checkSignature(request):
+        if wechat.check_signature(signature, timestamp, nonce):
             response = HttpResponse(echoStr, content_type="text/plain")
         else:
             response = HttpResponse(None, content_type="text/plain")
         return response
     elif request.method == 'POST':
-        # c = RequestContext(request,{'result':responseMsg(request)})
-        # t = Template('{{result}}')
-        # response = HttpResponse(t.render(c),content_type="application/xml")
-        if checkSignature(request):
-            response = HttpResponse(responseMsg(request), content_type="application/xml")
+        if wechat.check_signature(signature, timestamp, nonce):
+            response = HttpResponse(responseMsg(request, wechat), content_type="application/xml")
         else:
             response = HttpResponse(None, content_type="application/xml")
 
@@ -54,194 +33,17 @@ def handleRequest(request):
         return None
 
 
-def checkSignature(request):
-    global TOKEN
-    signature = request.GET.get("signature", None)
-    timestamp = request.GET.get("timestamp", None)
-    nonce = request.GET.get("nonce", None)
-
-    token = TOKEN
-    tmpList = [token, timestamp, nonce]
-    tmpList.sort()
-    tmpstr = "%s%s%s" % tuple(tmpList)
-    tmpstr = hashlib.sha1(tmpstr).hexdigest()
-    if tmpstr == signature:
-        return True
-    else:
-        return False
-
-
-def responseMsg(request):
-    rawStr = smart_str(request.body)
-    # rawStr = smart_str(request.POST['XML'])
-    msg = paraseMsgXml(ET.fromstring(rawStr))
-    msgtype = msg.get('MsgType')
-    content = msg.get('Content', '')
-    picurl = msg.get('PicUrl', '')
-    fuid = msg['FromUserName']
-    result_msg = u'test\n我'
-
-    # items = []
-    # item1 = {'Title': u'测试新闻', 'Description': u'新闻内容',
-    # 'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
-    # 'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
-    # item2 = {'Title': u'测试新闻1', 'Description': u'新闻内容12',
-    # 'PicUrl': 'http://i3.sinaimg.cn/dy/2014/1017/U5790P1DT20141017100148.jpg',
-    #          'Url': 'http://fashion.sina.com.cn/z/s/2015SSshanghaiFW/'}
-    # items.append(item1)
-    # # items.append(item2)
-    # text = getReplyXmlNews(msg, items)
-    # return text
-    #return getReplyXml(msg, result_msg)
+def responseMsg(request, wechat):
+    wechat.parse_data(request.body)
+    message = wechat.get_message()
     helperText = u'''平台测试中
 QQ：81300697
 回复1：获取泛亚有色金属最新资金配比情况'''
-    if msgtype == 'text':
-        if content == '1':
+    if message.type == 'text':
+        if message.content == '1':
             try:
-                return getReplyXml(msg, getFyMoneySupply().decode('utf8'))
+                return wechat.response_text(getFyMoneySupply().decode('utf8'))
             except Exception, e:
                 print str(e)
 
-    return getReplyXml(msg, helperText)
-
-
-def paraseMsgXml(rootElem):
-    msg = {}
-    if rootElem.tag == 'xml':
-        for child in rootElem:
-            msg[child.tag] = smart_str(child.text)
-    return msg
-
-
-def getReplyXml(msg, replyContent):
-    # extTpl = "<xml><ToUserName><![CDATA[%s]]></ToUserName><FromUserName><![CDATA[%s]]></FromUserName><CreateTime>%s</CreateTime><MsgType><![CDATA[%s]]></MsgType><Content><![CDATA[%s]]></Content><FuncFlag>0</FuncFlag></xml>";
-    # extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), 'text', replyContent)
-    tree = ET.fromstring('<xml></xml>')
-    ToUserName = ET.Element('ToUserName')
-    ToUserName.text = msg['FromUserName']
-    tree.append(ToUserName)
-
-    FromUserName = ET.Element('FromUserName')
-    FromUserName.text = msg['ToUserName']
-    tree.append(FromUserName)
-
-    CreateTime = ET.Element('CreateTime')
-    CreateTime.text = str(int(time.time()))
-    tree.append(CreateTime)
-
-    MsgType = ET.Element('MsgType')
-    MsgType.text = 'text'
-    tree.append(MsgType)
-
-    Content = ET.Element('Content')
-    Content.text = replyContent
-    tree.append(Content)
-
-    return ET.tostring(tree, 'utf8')
-
-
-def getReplyXmlNews(msg, items):
-    # extTpl = '''<xml>
-    # <ToUserName><![CDATA[%s]]></ToUserName>
-    # <FromUserName><![CDATA[%s]]></FromUserName>
-    # <CreateTime>%s</CreateTime>
-    # <MsgType><![CDATA[news]]></MsgType>
-    # <ArticleCount>1</ArticleCount>
-    # <Articles>
-    # <item>
-    # <Title><![CDATA[手机号实名]]></Title>
-    # <Description><![CDATA[%s]]></Description>
-    # <PicUrl><![CDATA[%s]]></PicUrl>
-    # <Url><![CDATA[]]></Url>
-    # </item>
-    # </Articles>
-    # </xml> '''
-    # extTpl = extTpl % (msg['FromUserName'], msg['ToUserName'], str(int(time.time())), replyContent, url)
-    # return extTpl
-    tree = ET.fromstring('<xml></xml>')
-    tree.append(getTextElement('ToUserName', msg['FromUserName']))
-    tree.append(getTextElement('FromUserName', msg['ToUserName']))
-    tree.append(getTextElement('CreateTime', str(int(time.time()))))
-    tree.append(getTextElement('MsgType', 'news'))
-    tree.append(getTextElement('ArticleCount', str(len(items))))
-    Articles = ET.Element('Articles')
-    for i in items:
-        Articles.append(getNewsElement(i))
-    tree.append(Articles)
-    return ET.tostring(tree, 'utf8')
-
-
-def getTextElement(tag, text):
-    element = ET.Element(tag)
-    element.text = text
-    return element
-
-
-def getNewsElement(item):
-    element = ET.fromstring('<item></item>')
-
-    ETitle = ET.Element('Title')
-    ETitle.text = item.get('Title', '')
-    element.append(ETitle)
-
-    EDescription = ET.Element('Description')
-    EDescription.text = item.get('Description', '')
-    element.append(EDescription)
-
-    EPicUrl = ET.Element('PicUrl')
-    EPicUrl.text = item.get('PicUrl', '')
-    element.append(EPicUrl)
-
-    EUrl = ET.Element('Url')
-    EUrl.text = item.get('Url', '')
-    element.append(EUrl)
-
-    return element
-
-
-def eventMsg(msg):
-    eventtype = msg.get('Event')
-    eventkey = msg.get('EventKey', '')
-
-    if eventtype == 'CLICK':
-        if eventkey == 'user':
-            # 注册
-            pass
-        elif eventkey == 'shiming':
-            # 实名
-            pass
-    elif eventtype == 'subscribe':
-        pass
-
-
-# def downloadIDimage(url, trueid):
-# import os,uuid
-# try:
-# f = urllib2.urlopen(url)
-# data = f.read()
-# filename = str(uuid.uuid4())
-# with open("%s/%s" % (os.path.join(MEDIA_ROOT, "idimg"), filename), "wb") as code:
-# code.write(data)
-# truename = Truename.objects.get(pk=trueid)
-# if truename.idstatus < 2:
-# truename.imgfile = '%s/%s'%('idimg', filename)
-# truename.idstatus = 2
-# truename.save()
-#         return True
-#     except Exception,e:
-#         return False
-
-
-
-def paraseResultXml(rootElem):
-    msg = {}
-    if rootElem.tag == 'xml':
-        for child in rootElem:
-            if child.text:
-                msg[child.tag] = smart_str(child.text)
-            else:
-                for c in child:
-                    msg[c.tag] = smart_str(c.text)
-
-    return msg
+    return wechat.response_text(helperText)
