@@ -1,0 +1,97 @@
+{% extends 'fyadmin/base.html' %}
+{% block title %}登录{% endblock %}
+{% block ext_header %}
+    <style>
+        #login_panel {
+            box-shadow: 0 0 1em 1em #ccc;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px
+        }
+
+        #img_code_view {
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function change_img_code() {
+            var img = $('#img_code_view');
+            var rand = Math.random();
+            img.attr('src', "{% url 'fyadmin:img_code' %}?t=" + rand);
+        }
+    </script>
+{% endblock %}
+{% block body %}
+
+    <div class="container">
+
+        <form action="" method="post" class="form">
+            <div class="panel panel-default panel-single" id="login_panel">
+
+                <div class="panel-heading">
+
+                    <h2>泛亚管理登录</h2>
+                </div>
+                <div class="panel-body">
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-block alert-danger">
+                            <ul>
+                                {{ form.non_field_errors|unordered_list }}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.username.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+
+                            <input id="username" type="text" class="form-control  " name="username" placeholder="用户名"
+                                   type="text">
+                        </div>
+                        {% for error in form.username.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.password.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+
+                            <input id="password" type="password" class="form-control" name="password" placeholder="密码"
+                                   type="text">
+                        </div>
+                        {% for error in form.password.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.img_code.errors %}has-error{% endif %}">
+                            <div class="input-group-addon "><img id="img_code_view" onclick="change_img_code();"
+                                                                 width="90" height="20"
+                                                                 src="{% url 'fyadmin:img_code' %}"></div>
+                            <input id="img_code" type="text" class="form-control" name="img_code" placeholder="验证码"
+                                   type="text">
+
+
+                        </div>
+                        {% for error in form.img_code.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <input class="btn btn-primary btn-block" type="submit" value="提交">
+
+                </div>
+
+                <div class="panel-footer">
+                    <div><a href="">忘记用户名或密码</a></div>
+                    <div><a href="{% url 'fyadmin:register' %}?next={{ url }}">注册</a></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

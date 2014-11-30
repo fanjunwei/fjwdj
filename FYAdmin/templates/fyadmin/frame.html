@@ -1,0 +1,78 @@
+{% extends 'fyadmin/base.html' %}
+{% block title %}{{ view.title }}{% endblock %}
+{% block  body %}
+    <!-- Frame -->
+
+    <!-- navbar -->
+    <div id="top-nav" class="navbar navbar-xs navbar-inverse">
+        <div class="navbar-header">
+            <p class="navbar-brand">泛亚</p>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right" style="margin-right: 5px">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+                        <strong>欢迎， {{ user.get_username }}</strong> <span class="caret"></span></a>
+                    <ul id="g-account-menu" class="dropdown-menu" role="menu">
+                        <li><a href="{% url 'fyadmin:change_password' %}"><span class="glyphicon glyphicon-cog"></span>
+                            更改密码</a></li>
+                    </ul>
+                </li>
+                <li><a href="{% url 'fyadmin:logout' %}"><span class="glyphicon glyphicon-log-out"></span><span
+                        class="hidden-sm hidden-xs">注销</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- navbar end -->
+    <div class=" container-fluid">
+        <div class="clearfix row">
+            <!-- Left menu-->
+            <div id="left-side" class="col-md-2 col-lg-2 hidden-sm hidden-xs">
+
+                {% include 'fyadmin/inclute/sitemenu.html' %}
+
+
+            </div>
+            <!-- Left menu end-->
+            <div class="col-md-9 col-lg-10">
+                {% if messages %}
+                    {% for message in messages %}
+                        {% ifequal message.tags 'error' %}
+                            <div class="alert alert-danger"
+                                 role="alert">{{ message }}</div>
+                        {% else %}
+                            <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}"
+                                 role="alert">{{ message }}</div>
+                        {% endifequal %}
+                    {% endfor %}
+
+                {% endif %}
+                {% block content-title %}
+                    <div class="navbar content-navbar navbar-default navbar-xs" data-toggle="breakpoint"
+                         data-class-xs="navbar content-navbar navbar-inverse navbar-xs"
+                         data-class-sm="navbar content-navbar navbar-default navbar-xs">
+                        <div class="navbar-header">
+
+                            <span class="navbar-brand">
+                                {% if view.parents %}
+                                    {% for parent in view.parents %}
+                                        <span class="parent-brand"><a
+                                                href="{{ parent.url }}"><u>{{ parent.name }}</u></a> <span
+                                                class="glyphicon glyphicon-chevron-right"></span></span>
+                                    {% endfor %}
+                                {% endif %}
+                                {{ view.title }}
+                            </span>
+
+                        </div>
+                    </div>
+                {% endblock %}
+                {% block content %}
+
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+    <!-- Frame end-->
+{% endblock %}

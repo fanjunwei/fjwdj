@@ -1,0 +1,163 @@
+{% extends 'fyadmin/base.html' %}
+{% block title %}注册{% endblock %}
+{% block ext_header %}
+    <style>
+        #login_panel {
+            box-shadow: 0 0 1em 1em #ccc;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px
+        }
+
+        #img_code_view {
+            cursor: pointer;
+        }
+
+    </style>
+    <script>
+        function change_img_code() {
+            var img = $('#img_code_view');
+            var rand = Math.random();
+            img.attr('src', "{% url 'fyadmin:img_code' %}?t=" + rand);
+        }
+        $(function () {
+
+            if (!hasPlaceholderSupport()) {
+                $('input').tooltip();
+            }
+        });
+    </script>
+{% endblock %}
+{% block body %}
+
+    <div class="container">
+
+        <form action="" method="post" class="form">
+            <div class="panel panel-default panel-single" id="login_panel">
+
+                <div class="panel-heading">
+
+                    <h2>用户注册</h2>
+                </div>
+                <div class="panel-body">
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-block alert-danger">
+                            <ul>
+                                {{ form.non_field_errors|unordered_list }}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.username.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+
+                            <input id="username" data-toggle="tooltip" data-placement="top" title="用户名" type="text"
+                                   class="form-control  " name="username" placeholder="用户名"
+                                   type="text">
+
+                        </div>
+                        <p class="help-block">登录此系统的用户名,用户名只允许为字母、数字和字符 @/./+/-/_ 。</p>
+                        {% for error in form.username.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.password1.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+
+                            <input id="password1" data-toggle="tooltip" data-placement="top" title="密码" type="password"
+                                   class="form-control" name="password1" placeholder="密码"
+                                   type="text">
+                        </div>
+                        {% for error in form.password1.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.password2.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+
+                            <input id="password2" data-toggle="tooltip" data-placement="top" title="确认密码"
+                                   type="password" class="form-control" name="password2"
+                                   placeholder="确认密码"
+                                   type="text">
+                        </div>
+                        {% for error in form.password2.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.email.errors %}has-error{% endif %}">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></div>
+
+                            <input id="email" data-toggle="tooltip" data-placement="top" title="Email" type="text"
+                                   class="form-control  " name="email" placeholder="Email"
+                                   type="text">
+                        </div>
+                        {% for error in form.email.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.fy_username.errors %}has-error{% endif %}">
+                            <div class="input-group-addon">泛亚账号</div>
+
+                            <input id="fy_username" data-toggle="tooltip" data-placement="top" title="泛亚账号" type="text"
+                                   class="form-control  " name="fy_username" placeholder="泛亚账号"
+                                   type="text">
+                        </div>
+                        {% for error in form.fy_username.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ form.fy_username.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.fy_password.errors %}has-error{% endif %}">
+                            <div class="input-group-addon">泛亚密码</div>
+
+                            <input id="fy_password" data-toggle="tooltip" data-placement="top" title="泛亚密码" type="password"
+                                   class="form-control  " name="fy_password" placeholder="泛亚密码"
+                                   type="text">
+                        </div>
+                        {% for error in form.fy_password.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ form.fy_password.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group input-group-lg {% if form.img_code.errors %}has-error{% endif %}">
+                            <div class="input-group-addon "><img id="img_code_view" onclick="change_img_code();"
+                                                                 width="90" height="20"
+                                                                 src="{% url 'fyadmin:img_code' %}"></div>
+                            <input id="img_code" data-toggle="tooltip" data-placement="top" title="验证码" type="text"
+                                   class="form-control" name="img_code" placeholder="验证码"
+                                   type="text">
+                        </div>
+                        {% for error in form.img_code.errors %}
+                            <p id="error_{{ forloop.counter }}_{{ field.auto_id }}"
+                               class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <input class="btn btn-primary btn-block" type="submit" value="提交">
+
+                </div>
+                <div class="panel-footer">
+
+                    <div><a href="{% url 'fyadmin:home' %}">登录</a></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

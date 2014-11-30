@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^fy/', include('fy.urls')),
     url(r'^weixin/', include('weixin.urls')),
     url(r'^$', 'fy.views.home', name='home'),
+    url(r'^fyadmin/', include('FYAdmin.urls',namespace='fyadmin')),
 )

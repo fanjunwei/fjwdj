@@ -1,0 +1,12 @@
+.required {
+    color: red;
+}
+
+.parent-brand {
+    font-size: .8em;
+    color: #a10000;
+}
+.parent-brand a
+{
+    color: #a10000;
+}
