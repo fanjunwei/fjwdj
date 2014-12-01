@@ -4,6 +4,7 @@
 # Email:fanjunwei003@163.com
 import json
 import requests
+from django.core.cache import cache
 
 __author__ = u'范俊伟'
 
@@ -200,22 +201,28 @@ def goods_CMP(v1, v2):
 
 
 def trading_limit(username, password, goodsId):
-    url = 'https://118.145.29.67:16831/portal/trading/report_trading_limits'
-    data = {'_password_': password,
-            'merchantId': username,
-            'goodsId': goodsId,
-            'method': 'LEND',
-            'action': 'ACQUIRE',
-            'isSelling': '0',
-            '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
-    res_json = json.loads(r.text)
-    params = res_json.get('params', {})
-    error_message = params.get('_message_', '')
-    if error_message:
-        return False, error_message
-    else:
-        return True, int(params.get('limit', 0))
+    cache_key = "%s%s%s" % (username, password, goodsId)
+    data = cache.get(cache_key)
+    if not data:
+        url = 'https://118.145.29.67:16831/portal/trading/report_trading_limits'
+        data = {'_password_': password,
+                'merchantId': username,
+                'goodsId': goodsId,
+                'method': 'LEND',
+                'action': 'ACQUIRE',
+                'isSelling': '0',
+                '_language_': 'zh'}
+        r = requests.post(url, data=data, verify=False)
+        res_json = json.loads(r.text)
+        params = res_json.get('params', {})
+        error_message = params.get('_message_', '')
+        if error_message:
+            return False, error_message
+        else:
+            data = int(params.get('limit', 0))
+            cache.set(cache_key, data)
+            return True, data
+    return True, data
 
 
 if __name__ == '__main__':

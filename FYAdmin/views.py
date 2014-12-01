@@ -516,7 +516,8 @@ class MoneySupplyView(FrameView):
             else:
                 dataError = False
             data = {
-                'object_list': object_list
+                'object_list': object_list,
+                'dataError': dataError
             }
             kwargs.update(data)
         else:

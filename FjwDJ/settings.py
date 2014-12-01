@@ -70,7 +70,7 @@ CACHES = {
         #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/var/tmp/django_cache',
-        'TIMEOUT': 60 * 15,
+        'TIMEOUT': 30,
         'KEY_PREFIX':'fjw_dj',
         'OPTIONS': {
             'MAX_ENTRIES': 2000,
