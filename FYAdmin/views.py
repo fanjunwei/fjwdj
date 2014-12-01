@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.utils.decorators import classonlymethod
-from django.utils.html import escape
+from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView
@@ -45,20 +45,31 @@ def get_img_code(request):
     return HttpResponse(data, 'image/png')
 
 
-def trading_limit(request):
-    goodsID = request.REQUEST.get('id')
-    if hasattr(request.user, 'fyuserprofile'):
-        checked, res = fy_api.trading_limit(request.user.fyuserprofile.fy_username,
-                                            request.user.fyuserprofile.fy_password, goodsID)
+tradingLimitLock = threading.RLock()
 
-        for i in range(0,10):
-            if checked:
-                return HttpResponse(res, 'text/html')
-            else:
-                time.sleep(0.5)
-        raise Http404(res)
-    else:
-        raise Http404(u'未设置泛亚账户')
+
+def trading_limit(request):
+    tradingLimitLock.acquire()
+    try:
+        goodsID = request.REQUEST.get('id')
+        if hasattr(request.user, 'fyuserprofile'):
+            checked, res = fy_api.trading_limit(request.user.fyuserprofile.fy_username,
+                                                request.user.fyuserprofile.fy_password, goodsID)
+
+            for i in range(0, 10):
+                if checked:
+                    if res < 10:
+                        html = format_html(u'<span style="color:red">{0}</span>', res)
+                    else:
+                        html = format_html(u'<span>{0}</span>', res)
+                    return HttpResponse(html, 'text/html')
+                else:
+                    time.sleep(0.5)
+            raise Http404(res)
+        else:
+            raise Http404(u'未设置泛亚账户')
+    finally:
+        tradingLimitLock.release()
 
 
 def logout(request):
