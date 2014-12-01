@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User, Permission
 from models import *
+from util import fy_api
 
 __author__ = u'范俊伟'
 
@@ -98,10 +99,21 @@ class RegisterForm(forms.ModelForm):
         self.request.session['login_img_code'] = None
         return img_code
 
+    def clean_fy_password(self):
+        fy_username = self.cleaned_data["fy_username"]
+        fy_password = self.cleaned_data["fy_password"]
+        check, message = fy_api.login(fy_username, fy_password)
+        if not check:
+            raise forms.ValidationError(u'泛亚账号错误:' + message)
+        else:
+            self.cleaned_data["fy_name"] = message
+        return fy_password
+
     def save(self, commit=True):
         user = super(RegisterForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.email = self.cleaned_data["email"]
+        user.first_name = self.cleaned_data["fy_name"]
         if commit:
             user.save()
             if not hasattr(user, 'fyuserprofile') or not user.fyuserprofile:

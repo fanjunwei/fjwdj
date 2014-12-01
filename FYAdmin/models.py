@@ -5,8 +5,6 @@ from django.db import models
 # Create your models here.
 from django.core.signing import Signer
 
-signer = Signer()
-
 
 class FYUserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -14,19 +12,13 @@ class FYUserProfile(models.Model):
     fy_password = models.CharField(max_length=255, verbose_name=u'泛亚密码')
 
     def get_fy_username(self):
-        global signer
-        return signer.unsign(self.fy_username)
+        return self.fy_username
 
     def set_fy_username(self, value):
-        global signer
-        self.fy_username = signer.sign(value)
-        pass
+        self.fy_username = value
 
     def get_fy_password(self):
-        global signer
-        return signer.unsign(self.fy_password)
+        return self.fy_password
 
     def set_fy_password(self, value):
-        global signer
-        self.fy_password = signer.sign(value)
-        pass
+        self.fy_password = value

@@ -11,7 +11,7 @@ from django import http
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.utils.decorators import classonlymethod
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -21,9 +21,11 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
+import time
 from FYAdmin.forms import *
 from FYAdmin.models import *
 from django.utils.http import urlencode
+from util.tools import *
 
 __author__ = u'范俊伟'
 
@@ -41,6 +43,22 @@ def get_img_code(request):
     res = os.popen('java -jar ' + ImageCode_path + ' ' + code)
     data = base64.decodestring(res.read())
     return HttpResponse(data, 'image/png')
+
+
+def trading_limit(request):
+    goodsID = request.REQUEST.get('id')
+    if hasattr(request.user, 'fyuserprofile'):
+        checked, res = fy_api.trading_limit(request.user.fyuserprofile.fy_username,
+                                            request.user.fyuserprofile.fy_password, goodsID)
+
+        for i in range(0,10):
+            if checked:
+                return HttpResponse(res, 'text/html')
+            else:
+                time.sleep(0.5)
+        raise Http404(res)
+    else:
+        raise Http404(u'未设置泛亚账户')
 
 
 def logout(request):
@@ -148,7 +166,28 @@ class RegisterView(BaseView):
 
 class FrameView(BaseView):
     def get_site_menu(self):
-        return []
+        return [
+            {'title': u'账户信息', 'menus':
+                [
+                    {'title': u'我的资金',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:cash_summary')},
+                    {'title': u'未成交查询',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:pending_orders')},
+                ],
+
+            },
+
+            {'title': u'资金受托', 'menus':
+                [
+                    {'title': u'资金配比',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:money_supply')},
+                ],
+
+            },
+        ]
 
     def get_context_data(self, **kwargs):
         kwargs = super(FrameView, self).get_context_data(**kwargs)
@@ -351,3 +390,125 @@ class ChangePasswordView(FrameFormView):
         self.form.save()
         messages.success(request, '修改成功')
         return self.get(request, *args, **kwargs)
+
+
+def appendMoneyItem(json_data, object_list, name, value_key):
+    try:
+        object_list.append((name, format(float(json_data.get(value_key)) / 100.0, ',.2f')))
+    except:
+        pass
+
+
+class CashSummaryView(FrameView):
+    template_name = 'fyadmin/cash_summary.html'
+    title = u'我的资金'
+
+    def get_context_data(self, **kwargs):
+        if hasattr(self.request.user, 'fyuserprofile'):
+            checked, res = fy_api.cash_summary(self.request.user.fyuserprofile.fy_username,
+                                               self.request.user.fyuserprofile.fy_password)
+            if checked:
+                object_list = []
+                appendMoneyItem(res, object_list, u'期初资金', 'initialBalance')
+                appendMoneyItem(res, object_list, u'期末资金', 'currentBalance')
+                appendMoneyItem(res, object_list, u'应追加资金', 'depositExpected')
+                appendMoneyItem(res, object_list, u'当日入金', 'deposit')
+                appendMoneyItem(res, object_list, u'可出资金', 'withdrawable')
+                object_list.append(None)
+                appendMoneyItem(res, object_list, u'总可用资金', 'available')
+                appendMoneyItem(res, object_list, u'资金权益', 'cashValue')
+                appendMoneyItem(res, object_list, u'货物权益', 'goodsValue')
+                data = {
+                    'object_list': object_list
+                }
+                kwargs.update(data)
+            else:
+                messages.error(self.request, res)
+        else:
+            messages.error(self.request, u'未设置泛亚账户')
+        return super(CashSummaryView, self).get_context_data(**kwargs)
+
+
+class PendingOrdersView(FrameView):
+    template_name = 'fyadmin/pending_orders.html'
+    title = u'未成交查询'
+
+    def post(self, request, *args, **kwargs):
+        selected_ids = request.REQUEST.getlist('id')
+        if '__action_delete' in request.POST:
+            if hasattr(self.request.user, 'fyuserprofile'):
+                fy_username = self.request.user.fyuserprofile.fy_username
+                fy_password = self.request.user.fyuserprofile.fy_password
+
+                error = False
+                if selected_ids:
+                    for id in selected_ids:
+                        checked, res = fy_api.cancel_order(fy_username, fy_password, id)
+                        if not checked:
+                            error = True
+                            messages.error(request, res)
+                    if not error:
+                        messages.success(request, u'撤销成功成功')
+                else:
+                    messages.error(request, u'未选择')
+            else:
+                messages.error(self.request, u'未设置泛亚账户')
+
+        return self.get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        if hasattr(self.request.user, 'fyuserprofile'):
+            checked, res = fy_api.pending_orders(self.request.user.fyuserprofile.fy_username,
+                                                 self.request.user.fyuserprofile.fy_password)
+            if checked:
+                data = {
+                    'object_list': res
+                }
+                kwargs.update(data)
+            else:
+                messages.error(self.request, res)
+        else:
+            messages.error(self.request, u'未设置泛亚账户')
+        return super(PendingOrdersView, self).get_context_data(**kwargs)
+
+
+class MoneySupplyView(FrameView):
+    template_name = 'fyadmin/money_supply.html'
+    title = u'资金配比'
+
+    def get_context_data(self, **kwargs):
+
+        checked, res = fy_api.all_googds()
+        if checked:
+            moneySupplyRequestedTotal = 0
+            moneySupplyTotal = 0
+
+            object_list = []
+            for item in res:
+                goodsId = item.get('goodsId')
+                goodsName = item.get('goodsName')
+                try:
+                    checked, googdsInfo = fy_api.get_money_info(goodsId, goodsName)
+                    if checked:
+                        if googdsInfo['moneySupplyRequested']:
+                            moneySupplyRequestedTotal += int(googdsInfo['m1'])
+                        if googdsInfo['moneySupply']:
+                            moneySupplyTotal += int(googdsInfo['m2'])
+                        object_list.append(googdsInfo)
+                except Exception:
+                    pass
+            object_list.sort(fy_api.goods_CMP)
+            mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
+            mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
+            if moneySupplyRequestedTotal <= 0 or moneySupplyTotal <= 0:
+                dataError = True
+            else:
+                dataError = False
+            data = {
+                'object_list': object_list
+            }
+            kwargs.update(data)
+        else:
+            messages.error(self.request, res)
+
+        return super(MoneySupplyView, self).get_context_data(**kwargs)

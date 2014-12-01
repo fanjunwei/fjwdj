@@ -1,0 +1,29 @@
+{% extends 'fyadmin/frame.html' %}
+{% block ext_header %}
+    <style>
+        .col-md-6 {
+            font-size: 1.2em;
+        }
+    </style>
+
+{% endblock %}
+{% block content %}
+    <div style="max-width: 200px;margin: auto">
+        {% for object in object_list %}
+            {% if object %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ object.0 }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ object.1 }}
+                    </div>
+                </div>
+            {% else %}
+                <br>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

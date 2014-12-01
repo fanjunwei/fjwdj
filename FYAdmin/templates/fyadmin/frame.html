@@ -12,7 +12,8 @@
             <ul class="nav navbar-nav navbar-right" style="margin-right: 5px">
                 <li class="dropdown">
                     <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
-                        <strong>欢迎， {{ user.get_username }}</strong> <span class="caret"></span></a>
+                        <strong>欢迎， {% if user.first_name %}{{ user.first_name }}{% else %}
+                            {{ user.get_username }}{% endif %}</strong> <span class="caret"></span></a>
                     <ul id="g-account-menu" class="dropdown-menu" role="menu">
                         <li><a href="{% url 'fyadmin:change_password' %}"><span class="glyphicon glyphicon-cog"></span>
                             更改密码</a></li>
@@ -68,6 +69,7 @@
                         </div>
                     </div>
                 {% endblock %}
+
                 {% block content %}
 
                 {% endblock %}

@@ -9,8 +9,12 @@ __author__ = u'范俊伟'
 
 urlpatterns = patterns('fyadmin',
                        url(r'^img_code/$', get_img_code, name='img_code'),
+                       url(r'^trading_limit/$', trading_limit, name='trading_limit'),
                        url(r'^register/$', RegisterView.as_view(), name='register'),
                        url(r'^logout/$', logout, name='logout'),
                        url(r'^$', HomeView.as_view(), name='home'),
                        url(r'^change_password/$', ChangePasswordView.as_view(), name='change_password'),
+                       url(r'^cash_summary/$', CashSummaryView.as_view(), name='cash_summary'),
+                       url(r'^pending_orders/$', PendingOrdersView.as_view(), name='pending_orders'),
+                       url(r'^money_supply/$', MoneySupplyView.as_view(), name='money_supply'),
 )
