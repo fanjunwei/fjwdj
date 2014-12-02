@@ -554,8 +554,20 @@ class LendingOrderView(FrameFormView):
     form_class = LendOrderForm
 
     def form_valid(self, request, *args, **kwargs):
-        self.form.save()
-        messages.success(request, '修改成功')
+        goodsId = self.kwargs.get('goodsId')
+        my_type = self.form.cleaned_data.get('my_type')
+        order_count = self.form.cleaned_data.get('order_count')
+        if hasattr(self.request.user, 'fyuserprofile'):
+            checked, res = fy_api.submit_order(self.request.user.fyuserprofile.fy_username,
+                                               self.request.user.fyuserprofile.fy_password,
+                                               goodsId, order_count, my_type)
+
+            if not checked:
+                messages.error(request, res)
+            else:
+                messages.success(request, u'提交成功')
+        else:
+            messages.error(self.request, u'未设置泛亚账户')
         return self.get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

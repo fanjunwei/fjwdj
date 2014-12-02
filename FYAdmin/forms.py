@@ -246,5 +246,3 @@ class LendOrderForm(forms.Form):
         self.request = request
         super(LendOrderForm, self).__init__(*args, **kwargs)
 
-    count = forms.CharField(label='count')
-

@@ -254,6 +254,55 @@ def trading_limit(username, password, goodsId, my_type='money_begin'):
     return True, data
 
 
+def submit_order(username, password, goodsId, order_count, my_type='money_begin'):
+    '''
+    提交申购请求
+    :param username:
+    :param password:
+    :param goodsId:
+    :param my_type:money_begin,money_end,goods_begin,goods_end
+    :return:
+    '''
+    if my_type == 'money_begin':
+        method = 'LEND'
+        action = 'ACQUIRE'
+        isSelling = 0
+    elif my_type == 'money_end':
+        method = 'LEND'
+        action = 'DELIVER'
+        isSelling = 1
+    elif my_type == 'goods_begin':
+        method = 'LEND'
+        action = 'ACQUIRE'
+        isSelling = 1
+    elif my_type == 'goods_end':
+        method = 'LEND'
+        action = 'DELIVER'
+        isSelling = 0
+    else:
+        raise Exception('my_type error')
+
+    url = 'https://118.145.29.67:16831/portal/trading/submit_order'
+    data = {'_password_': password,
+            'merchantId': username,
+            'goodsId': goodsId,
+            'method': method,
+            'action': action,
+            'isSelling': isSelling,
+            'quantity': order_count,
+            'type': 'LIMIT',
+            'style': 'NORMAL',
+            '_language_': 'zh'}
+    r = requests.post(url, data=data, verify=False)
+    res_json = json.loads(r.text)
+    params = res_json.get('params', {})
+    error_message = params.get('_message_', '')
+    if error_message:
+        return False, error_message
+    else:
+        return True, int(params.get('limit', 0))
+
+
 if __name__ == '__main__':
     check, res = trading_limit('0724000238', '618033', 'SB')
     check, res = all_googds()
