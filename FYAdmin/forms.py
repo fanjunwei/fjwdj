@@ -198,33 +198,25 @@ class ChangeFYForm(forms.Form):
     fy_username = forms.CharField(label='泛亚账号')
     fy_password = forms.CharField(label='泛亚密码', widget=forms.PasswordInput)
 
-
     def clean_fy_username(self):
         fy_username = self.cleaned_data["fy_username"]
         if FYUserProfile.objects.filter(fy_username=fy_username).exclude(user=self.request.user).exists():
             raise forms.ValidationError(u'泛亚账号已占用')
         return fy_username
 
-    def clean_fy_password(self):
-        fy_username = self.cleaned_data.get("fy_username", None)
-        fy_password = self.cleaned_data.get("fy_password", None)
-        if fy_username and fy_password:
-            check, message = fy_api.login(fy_username, fy_password)
-            if not check:
-                raise forms.ValidationError(u'泛亚账号错误:' + message)
-            else:
-                self.cleaned_data["fy_name"] = message
-            return fy_password
-        else:
-            return ''
 
     def clean(self):
         fy_username = self.cleaned_data.get("fy_username", None)
         fy_password = self.cleaned_data.get("fy_password", None)
         if fy_username and fy_password:
+            check, message = fy_api.login(fy_username, fy_password)
+            if not check:
+                raise forms.ValidationError(message)
+            else:
+                self.cleaned_data["fy_name"] = message
             return self.cleaned_data
         else:
-            raise forms.ValidationError(u'泛亚账号错误')
+            return self.cleaned_data
 
     def save(self, commit=True):
         user = self.request.user
@@ -241,4 +233,18 @@ class ChangeFYForm(forms.Form):
             user.save()
         return fyuserprofile
 
+
+class LendOrderForm(forms.Form):
+    MY_TYPE_CHOICES = [
+        ( 'money_begin', '资金受托'),
+        ( 'money_end', '资金受托终止')
+    ]
+    my_type = forms.ChoiceField(label='方式', choices=MY_TYPE_CHOICES)
+    order_count = forms.IntegerField(label=u'数量')
+
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        super(LendOrderForm, self).__init__(*args, **kwargs)
+
+    count = forms.CharField(label='count')
 

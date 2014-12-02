@@ -56,16 +56,14 @@ def trading_limit(request):
             checked, res = fy_api.trading_limit(request.user.fyuserprofile.fy_username,
                                                 request.user.fyuserprofile.fy_password, goodsID)
 
-            for i in range(0, 10):
-                if checked:
-                    if res < 10:
-                        html = format_html(u'<span style="color:red">{0}</span>', res)
-                    else:
-                        html = format_html(u'<span>{0}</span>', res)
-                    return HttpResponse(html, 'text/html')
+            if checked:
+                if res < 10:
+                    html = format_html(u'<span style="color:red">{0}</span>', res)
                 else:
-                    time.sleep(0.5)
-            raise Http404(res)
+                    html = format_html(u'<span>{0}</span>', res)
+                return HttpResponse(html, 'text/html')
+            else:
+                raise Http404(res)
         else:
             raise Http404(u'未设置泛亚账户')
     finally:
@@ -518,6 +516,19 @@ class MoneySupplyView(FrameView):
                                 moneySupplyRequestedTotal += int(googdsInfo['m1'])
                             if googdsInfo['moneySupply']:
                                 moneySupplyTotal += int(googdsInfo['m2'])
+                            '''
+                            if hasattr(self.request.user, 'fyuserprofile'):
+                                checked, res = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
+                                                                    self.request.user.fyuserprofile.fy_password,
+                                                                    goodsId)
+
+                                if checked:
+                                    if res < 10:
+                                        html = format_html(u'<span style="color:red">{0}</span>', res)
+                                    else:
+                                        html = format_html(u'<span>{0}</span>', res)
+                                    googdsInfo['limit'] = html
+                            '''
                             object_list.append(googdsInfo)
                     except Exception:
                         pass
@@ -535,3 +546,41 @@ class MoneySupplyView(FrameView):
             kwargs.update(data)
 
         return super(MoneySupplyView, self).get_context_data(**kwargs)
+
+
+class LendingOrderView(FrameFormView):
+    template_name = 'fyadmin/lend_order.html'
+    title = u'资金受托'
+    form_class = LendOrderForm
+
+    def form_valid(self, request, *args, **kwargs):
+        self.form.save()
+        messages.success(request, '修改成功')
+        return self.get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        goodsId = self.kwargs.get('goodsId')
+        data = {}
+        try:
+            checked, goodsInfo = fy_api.get_money_info(goodsId, None)
+            if checked:
+                data['id'] = goodsInfo.get('id')
+                data['ratio_format'] = goodsInfo.get('ratio_format') + '%'
+                data['moneySupplyRequested'] = goodsInfo.get('moneySupplyRequested')
+                data['moneySupply'] = goodsInfo.get('moneySupply')
+                data['recommendation'] = goodsInfo.get('recommendation')
+                data['financePrice'] = goodsInfo.get('financePrice')
+                checked, limit = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
+                                                      self.request.user.fyuserprofile.fy_password,
+                                                      goodsId)
+                if checked:
+                    data['limit'] = limit
+                checked, limit_end = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
+                                                          self.request.user.fyuserprofile.fy_password,
+                                                          goodsId, 'money_end')
+                if checked:
+                    data['limit_end'] = limit_end
+            kwargs.update(data)
+        except Exception:
+            pass
+        return super(LendingOrderView, self).get_context_data(**kwargs)

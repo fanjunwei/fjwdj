@@ -67,9 +67,11 @@ def pending_orders(username, password):
                     item = {}
                     for i in range(0, len(row)):
                         item[columns[i]] = row[i]
-                    if item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE':
+                    if item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 0:
                         item['my_type'] = '资金受托'
-                    elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER':
+                    elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 1:
                         item['my_type'] = '资金受托终止'
                     else:
                         item['my_type'] = item.get('method') + ":" + item.get('action')
@@ -200,17 +202,44 @@ def goods_CMP(v1, v2):
     return -cmp(r1, r2)
 
 
-def trading_limit(username, password, goodsId):
-    cache_key = "trading_limit%s%s%s" % (username, password, goodsId)
+def trading_limit(username, password, goodsId, my_type='money_begin'):
+    '''
+
+    :param username:
+    :param password:
+    :param goodsId:
+    :param my_type:money_begin,money_end,goods_begin,goods_end
+    :return:
+    '''
+    cache_key = "trading_limit%s%s%s%s" % (username, password, goodsId, my_type)
     data = cache.get(cache_key)
     if not data:
+        if my_type == 'money_begin':
+            method = 'LEND'
+            action = 'ACQUIRE'
+            isSelling = 0
+        elif my_type == 'money_end':
+            method = 'LEND'
+            action = 'DELIVER'
+            isSelling = 1
+        elif my_type == 'goods_begin':
+            method = 'LEND'
+            action = 'ACQUIRE'
+            isSelling = 1
+        elif my_type == 'goods_end':
+            method = 'LEND'
+            action = 'DELIVER'
+            isSelling = 0
+        else:
+            raise Exception('my_type error')
+
         url = 'https://118.145.29.67:16831/portal/trading/report_trading_limits'
         data = {'_password_': password,
                 'merchantId': username,
                 'goodsId': goodsId,
-                'method': 'LEND',
-                'action': 'ACQUIRE',
-                'isSelling': '0',
+                'method': method,
+                'action': action,
+                'isSelling': isSelling,
                 '_language_': 'zh'}
         r = requests.post(url, data=data, verify=False)
         res_json = json.loads(r.text)

@@ -1,0 +1,70 @@
+{% extends 'fyadmin/frame_edit.html' %}
+{% block fields %}
+    <div class="panel well">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    {% with label='货物代码' value=id %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+                <div class="col-md-6">
+                    {% with label='资金比例' value=ratio_format %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    {% with label='资金需求委托总量' value=moneySupplyRequested %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+                <div class="col-md-6">
+                    {% with label='资金受托申报总量' value=moneySupply %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    {% with label='指导价' value=recommendation %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+                <div class="col-md-6">
+                    {% with label='委托受托价' value=financePrice %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    {% with label='可申报量' value=limit %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+                <div class="col-md-6">
+                    {% with label='可了结量' value=limit_end %}
+                        {% include 'fyadmin/inclute/form_field_readonly.html' %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% with field=form.my_type %}
+        {% include 'fyadmin/inclute/form_field_select.html' %}
+    {% endwith %}
+    {% with field=form.order_count %}
+        {% include 'fyadmin/inclute/form_field_text.html' %}
+    {% endwith %}
+{% endblock %}
+{% block buttons %}
+    <button type="submit" class="btn btn-primary">提交</button>
+{% endblock %}
+

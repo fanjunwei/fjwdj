@@ -8,15 +8,15 @@
         }
     </style>
     <script>
-        $(function () {
-            $('[role=trading_limit]').each(function () {
-                var control = $(this);
-                var goodsID = control.attr('goodsID');
-                $.get("{% url 'fyadmin:trading_limit' %}?id=" + goodsID, function (result) {
-                    control.html(result);
-                });
-            });
-        });
+        //$(function () {
+        //    $('[role=trading_limit]').each(function () {
+        //        var control = $(this);
+        //        var goodsID = control.attr('goodsID');
+        //        $.get("{% url 'fyadmin:trading_limit' %}?id=" + goodsID, function (result) {
+        //            control.html(result);
+        //        });
+        //    });
+        //});
 
     </script>
 
@@ -28,21 +28,25 @@
         <table class="table table-striped table-bordered table-hover" id="object_table">
             <thead>
             <tr>
-
                 <th>名称</th>
                 <th>资金比例</th>
                 <th>资金需求委托总量</th>
                 <th>资金受托申报总量</th>
                 <th>指导价</th>
                 <th>委托受托价</th>
-                <th>可申报量</th>
             </tr>
             </thead>
             <tbody>
             {% for object in object_list %}
                 <tr>
 
-                    <td>{{ object.id|default_if_none:'' }}<br>{{ object.name|default_if_none:'' }}</td>
+                    <td>
+                        <a href="{% url 'fyadmin:lend_order' object.id %}">
+                            {{ object.id|default_if_none:'' }}
+                            <br>
+                            {{ object.name|default_if_none:'' }}
+                        </a>
+                    </td>
                     <td>
                         <div style='text-align:right;'>
                             {{ object.ratio_format|default_if_none:'' }}{% if object.ratio %}%{% endif %}</div>
@@ -58,9 +62,6 @@
                     </td>
                     <td>
                         <div style='text-align:right;'>{{ object.financePrice|default_if_none:'' }}</div>
-                    </td>
-                    <td>
-                        <div role="trading_limit" goodsID="{{ object.id }}" style='text-align:right;'></div>
                     </td>
 
                 </tr>
