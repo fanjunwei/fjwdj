@@ -42,9 +42,8 @@
 
                     <td>
                         <a href="{% url 'fyadmin:lend_order' object.id %}">
-                            {{ object.id|default_if_none:'' }}
-                            <br>
-                            {{ object.name|default_if_none:'' }}
+
+                            {{ object.name|default_if_none:'' }}{{ object.id|default_if_none:'' }}
                         </a>
                     </td>
                     <td>

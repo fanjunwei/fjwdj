@@ -184,6 +184,10 @@ class FrameView(BaseView):
                     {'title': u'未成交查询',
                      'icon': 'glyphicon-star',
                      'url': reverse('fyadmin:pending_orders')},
+                    {'title': u'交易资产汇总',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:consolidated')},
+
                 ],
 
             },
@@ -433,11 +437,37 @@ class CashSummaryView(FrameView):
                 appendMoneyItem(res, object_list, u'期末资金', 'currentBalance')
                 appendMoneyItem(res, object_list, u'应追加资金', 'depositExpected')
                 appendMoneyItem(res, object_list, u'当日入金', 'deposit')
+                appendMoneyItem(res, object_list, u'当日出金', 'withdrawal')
                 appendMoneyItem(res, object_list, u'可出资金', 'withdrawable')
                 object_list.append(None)
                 appendMoneyItem(res, object_list, u'总可用资金', 'available')
                 appendMoneyItem(res, object_list, u'资金权益', 'cashValue')
                 appendMoneyItem(res, object_list, u'货物权益', 'goodsValue')
+                object_list.append(None)
+                appendMoneyItem(res, object_list, u'应收货款/资金', 'receivable')
+                appendMoneyItem(res, object_list, u'应付货款/资金', 'payable')
+                appendMoneyItem(res, object_list, u'首付中暂扣', 'payWithheld')
+                appendMoneyItem(res, object_list, u'余款划拨', 'payReleased')
+                appendMoneyItem(res, object_list, u'押金', 'currentDeposit')
+                appendMoneyItem(res, object_list, u'冻结资金', 'currentCollateral')
+                object_list.append(None)
+                appendMoneyItem(res, object_list, u'预扣押金', 'depositHeld')
+                appendMoneyItem(res, object_list, u'预扣服务费', 'feesHeld')
+                appendMoneyItem(res, object_list, u'买卖服务费', 'tradingFees')
+                appendMoneyItem(res, object_list, u'买卖（委托）服务费', 'orderingFees')
+                appendMoneyItem(res, object_list, u'受托服务费', 'lendingFees')
+                appendMoneyItem(res, object_list, u'交收服务费', 'deliveryFees')
+                object_list.append(None)
+                appendMoneyItem(res, object_list, u'买卖（委托）盈亏', 'orderingGain')
+                appendMoneyItem(res, object_list, u'终止盈亏', 'profit')
+                appendMoneyItem(res, object_list, u'买卖（申报）溢短', 'orderingDiff')
+                appendMoneyItem(res, object_list, u'受托价格溢短', 'lendingDiff')
+                object_list.append(None)
+                appendMoneyItem(res, object_list, u'保险费', 'insurance')
+                appendMoneyItem(res, object_list, u'仓储费', 'storage')
+                appendMoneyItem(res, object_list, u'受托管理费', 'administration')
+                appendMoneyItem(res, object_list, u'应付日金', 'interest')
+                appendMoneyItem(res, object_list, u'应收日金', 'earnings')
                 data = {
                     'object_list': object_list
                 }
@@ -596,3 +626,23 @@ class LendingOrderView(FrameFormView):
         except Exception:
             pass
         return super(LendingOrderView, self).get_context_data(**kwargs)
+
+
+class ConsolidatedView(FrameView):
+    template_name = 'fyadmin/consolidated.html'
+    title = u'交易资产汇总'
+
+    def get_context_data(self, **kwargs):
+        if hasattr(self.request.user, 'fyuserprofile'):
+            checked, res = fy_api.consolidated(self.request.user.fyuserprofile.fy_username,
+                                               self.request.user.fyuserprofile.fy_password)
+            if checked:
+                data = {
+                    'object_list': res
+                }
+                kwargs.update(data)
+            else:
+                messages.error(self.request, res)
+        else:
+            messages.error(self.request, u'未设置泛亚账户')
+        return super(ConsolidatedView, self).get_context_data(**kwargs)

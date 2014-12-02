@@ -67,14 +67,42 @@ def pending_orders(username, password):
                     item = {}
                     for i in range(0, len(row)):
                         item[columns[i]] = row[i]
-                    if item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                    if item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
                                     item.get('isSelling') == 0:
-                        item['my_type'] = '资金受托'
+                        item['my_type'] = '买入（委托）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '买入（委托）还款收货申报'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'TRANSFER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '卖出（委托）终止'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1 and item.get('isOnGoods') == 1:
+                        item['my_type'] = '卖出（申报）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1 and item.get('isOnGoods') == 0:
+                        item['my_type'] = '卖出（委托）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '卖出（申报）终止'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'TRANSFER' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '买入（委托）终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '货物受托终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '资金（受托）'
                     elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER' and \
                                     item.get('isSelling') == 1:
                         item['my_type'] = '资金受托终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '货物（受托）'
                     else:
-                        item['my_type'] = item.get('method') + ":" + item.get('action')
+                        item['my_type'] = "method:%s,action:%s,isSelling:%s" % (
+                            item.get('method'), item.get('action'), item.get('isSelling'))
 
                     res.append(item)
         return True, res
@@ -301,6 +329,81 @@ def submit_order(username, password, goodsId, order_count, my_type='money_begin'
         return False, error_message
     else:
         return True, int(params.get('limit', 0))
+
+
+def consolidated(username, password):
+    '''
+    交易资产汇总
+    :param username:
+    :param password:
+    :return:
+    '''
+    url = 'https://118.145.29.67:16831/portal/trading/report_consolidated_contracts'
+    data = {'_password_': password,
+            'merchantId': username,
+            '_language_': 'zh'}
+    r = requests.post(url, data=data, verify=False)
+    res_json = json.loads(r.text)
+    params = res_json.get('params', {})
+    tables = res_json.get('tables')
+    error_message = params.get('_message_', '')
+    if error_message:
+        return False, error_message
+    else:
+        res = []
+        columns = tables.get('consolidated', {}).get('columns', None)
+        if columns:
+            rows = tables.get('consolidated', {}).get('rows', None)
+            if rows:
+                for row in rows:
+                    item = {}
+                    for i in range(0, len(row)):
+                        item[columns[i]] = row[i]
+
+                    if item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '买入（委托）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '买入（委托）还款收货申报'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'TRANSFER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '卖出（委托）终止'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1 and item.get('isOnGoods') == 1:
+                        item['my_type'] = '卖出（申报）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1 and item.get('isOnGoods') == 0:
+                        item['my_type'] = '卖出（委托）'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '卖出（申报）终止'
+                    elif item.get('method') == 'ORDER' and item.get('action') == 'TRANSFER' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '买入（委托）终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '货物受托终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 0:
+                        item['my_type'] = '资金（受托）'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'DELIVER' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '资金受托终止'
+                    elif item.get('method') == 'LEND' and item.get('action') == 'ACQUIRE' and \
+                                    item.get('isSelling') == 1:
+                        item['my_type'] = '货物（受托）'
+                    else:
+                        item['my_type'] = "method:%s,action:%s,isSelling:%s" % (
+                            item.get('method'), item.get('action'), item.get('isSelling'))
+
+                    item['price'] = float(item['price']) / 100
+                    item['lendingDiff'] = float(item['lendingDiff']) / 100
+                    item['financingDiff'] = float(item['financingDiff']) / 100
+                    item['orderingDiff'] = float(item['orderingDiff']) / 100
+
+                    res.append(item)
+        return True, res
 
 
 if __name__ == '__main__':
