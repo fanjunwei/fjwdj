@@ -1,0 +1,13 @@
+{% extends 'fyadmin/frame_edit.html' %}
+{% block fields %}
+    {% with field=form.fy_username %}
+        {% include 'fyadmin/inclute/form_field_text.html' %}
+    {% endwith %}
+    {% with field=form.fy_password %}
+        {% include 'fyadmin/inclute/form_field_password.html' %}
+    {% endwith %}
+{% endblock %}
+{% block buttons %}
+    <button type="submit" class="btn btn-primary">修改</button>
+{% endblock %}
+

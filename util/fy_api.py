@@ -201,7 +201,7 @@ def goods_CMP(v1, v2):
 
 
 def trading_limit(username, password, goodsId):
-    cache_key = "%s%s%s" % (username, password, goodsId)
+    cache_key = "trading_limit%s%s%s" % (username, password, goodsId)
     data = cache.get(cache_key)
     if not data:
         url = 'https://118.145.29.67:16831/portal/trading/report_trading_limits'

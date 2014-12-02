@@ -15,8 +15,18 @@
                         <strong>欢迎， {% if user.first_name %}{{ user.first_name }}{% else %}
                             {{ user.get_username }}{% endif %}</strong> <span class="caret"></span></a>
                     <ul id="g-account-menu" class="dropdown-menu" role="menu">
-                        <li><a href="{% url 'fyadmin:change_password' %}"><span class="glyphicon glyphicon-cog"></span>
-                            更改密码</a></li>
+                        <li>
+                            <a href="{% url 'fyadmin:change_password' %}">
+                                <span class="glyphicon glyphicon-cog"></span>
+                                更改密码
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'fyadmin:change_fy' %}">
+                                <span class="glyphicon glyphicon-cog"></span>
+                                修改泛亚账号
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li><a href="{% url 'fyadmin:logout' %}"><span class="glyphicon glyphicon-log-out"></span><span

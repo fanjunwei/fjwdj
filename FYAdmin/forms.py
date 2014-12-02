@@ -99,21 +99,39 @@ class RegisterForm(forms.ModelForm):
         self.request.session['login_img_code'] = None
         return img_code
 
-    def clean_fy_password(self):
+    def clean_fy_username(self):
         fy_username = self.cleaned_data["fy_username"]
-        fy_password = self.cleaned_data["fy_password"]
-        check, message = fy_api.login(fy_username, fy_password)
-        if not check:
-            raise forms.ValidationError(u'泛亚账号错误:' + message)
+        if FYUserProfile.objects.filter(fy_username=fy_username).exists():
+            raise forms.ValidationError(u'泛亚账号已注册')
+        return fy_username
+
+    def clean_fy_password(self):
+        fy_username = self.cleaned_data.get("fy_username", None)
+        fy_password = self.cleaned_data.get("fy_password", None)
+        if fy_username and fy_password:
+            check, message = fy_api.login(fy_username, fy_password)
+            if not check:
+                raise forms.ValidationError(u'泛亚账号错误:' + message)
+            else:
+                self.cleaned_data["fy_name"] = message
+            return fy_password
         else:
-            self.cleaned_data["fy_name"] = message
-        return fy_password
+            return ''
+
+    def clean(self):
+        fy_username = self.cleaned_data.get("fy_username", None)
+        fy_password = self.cleaned_data.get("fy_password", None)
+        if fy_username and fy_password:
+            return self.cleaned_data
+        else:
+            raise forms.ValidationError(u'泛亚账号错误')
 
     def save(self, commit=True):
         user = super(RegisterForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.email = self.cleaned_data["email"]
         user.first_name = self.cleaned_data["fy_name"]
+
         if commit:
             user.save()
             if not hasattr(user, 'fyuserprofile') or not user.fyuserprofile:
@@ -171,5 +189,56 @@ class ChangePasswordForm(forms.Form):
             user.save()
         return user
 
+
+class ChangeFYForm(forms.Form):
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request
+        super(ChangeFYForm, self).__init__(*args, **kwargs)
+
+    fy_username = forms.CharField(label='泛亚账号')
+    fy_password = forms.CharField(label='泛亚密码', widget=forms.PasswordInput)
+
+
+    def clean_fy_username(self):
+        fy_username = self.cleaned_data["fy_username"]
+        if FYUserProfile.objects.filter(fy_username=fy_username).exclude(user=self.request.user).exists():
+            raise forms.ValidationError(u'泛亚账号已占用')
+        return fy_username
+
+    def clean_fy_password(self):
+        fy_username = self.cleaned_data.get("fy_username", None)
+        fy_password = self.cleaned_data.get("fy_password", None)
+        if fy_username and fy_password:
+            check, message = fy_api.login(fy_username, fy_password)
+            if not check:
+                raise forms.ValidationError(u'泛亚账号错误:' + message)
+            else:
+                self.cleaned_data["fy_name"] = message
+            return fy_password
+        else:
+            return ''
+
+    def clean(self):
+        fy_username = self.cleaned_data.get("fy_username", None)
+        fy_password = self.cleaned_data.get("fy_password", None)
+        if fy_username and fy_password:
+            return self.cleaned_data
+        else:
+            raise forms.ValidationError(u'泛亚账号错误')
+
+    def save(self, commit=True):
+        user = self.request.user
+        if not hasattr(user, 'fyuserprofile') or not user.fyuserprofile:
+            fyuserprofile = FYUserProfile(user=user)
+        else:
+            fyuserprofile = user.fyuserprofile
+
+        fyuserprofile.set_fy_username(self.cleaned_data["fy_username"])
+        fyuserprofile.set_fy_password(self.cleaned_data["fy_password"])
+        if commit:
+            fyuserprofile.save()
+            user.first_name = self.cleaned_data["fy_name"]
+            user.save()
+        return fyuserprofile
 
 

@@ -403,6 +403,17 @@ class ChangePasswordView(FrameFormView):
         return self.get(request, *args, **kwargs)
 
 
+class ChangeFYView(FrameFormView):
+    template_name = 'fyadmin/change_fy.html'
+    title = u'修改泛亚账号'
+    form_class = ChangeFYForm
+
+    def form_valid(self, request, *args, **kwargs):
+        self.form.save()
+        messages.success(request, '修改成功')
+        return self.get(request, *args, **kwargs)
+
+
 def appendMoneyItem(json_data, object_list, name, value_key):
     try:
         object_list.append((name, format(float(json_data.get(value_key)) / 100.0, ',.2f')))
@@ -488,39 +499,39 @@ class MoneySupplyView(FrameView):
     title = u'资金配比'
 
     def get_context_data(self, **kwargs):
+        cache_key = 'money_supply_view'
+        data = cache.get(cache_key)
+        if not data:
+            checked, res = fy_api.all_googds()
+            if checked:
+                moneySupplyRequestedTotal = 0
+                moneySupplyTotal = 0
 
-        checked, res = fy_api.all_googds()
-        if checked:
-            moneySupplyRequestedTotal = 0
-            moneySupplyTotal = 0
-
-            object_list = []
-            for item in res:
-                goodsId = item.get('goodsId')
-                goodsName = item.get('goodsName')
-                try:
-                    checked, googdsInfo = fy_api.get_money_info(goodsId, goodsName)
-                    if checked:
-                        if googdsInfo['moneySupplyRequested']:
-                            moneySupplyRequestedTotal += int(googdsInfo['m1'])
-                        if googdsInfo['moneySupply']:
-                            moneySupplyTotal += int(googdsInfo['m2'])
-                        object_list.append(googdsInfo)
-                except Exception:
-                    pass
-            object_list.sort(fy_api.goods_CMP)
-            mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
-            mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
-            if moneySupplyRequestedTotal <= 0 or moneySupplyTotal <= 0:
-                dataError = True
+                object_list = []
+                for item in res:
+                    goodsId = item.get('goodsId')
+                    goodsName = item.get('goodsName')
+                    try:
+                        checked, googdsInfo = fy_api.get_money_info(goodsId, goodsName)
+                        if checked:
+                            if googdsInfo['moneySupplyRequested']:
+                                moneySupplyRequestedTotal += int(googdsInfo['m1'])
+                            if googdsInfo['moneySupply']:
+                                moneySupplyTotal += int(googdsInfo['m2'])
+                            object_list.append(googdsInfo)
+                    except Exception:
+                        pass
+                object_list.sort(fy_api.goods_CMP)
+                mf1 = format(moneySupplyRequestedTotal / 100000000.0, ',.2f')
+                mf2 = format(moneySupplyTotal / 100000000.0, ',.2f')
+                data = {
+                    'object_list': object_list,
+                }
+                cache.set(cache_key, data)
+                kwargs.update(data)
             else:
-                dataError = False
-            data = {
-                'object_list': object_list,
-                'dataError': dataError
-            }
-            kwargs.update(data)
+                messages.error(self.request, res)
         else:
-            messages.error(self.request, res)
+            kwargs.update(data)
 
         return super(MoneySupplyView, self).get_context_data(**kwargs)
