@@ -277,7 +277,7 @@ def trading_limit(username, password, goodsId, my_type='money_begin'):
             return False, error_message
         else:
             data = int(params.get('limit', 0))
-            cache.set(cache_key, data)
+            cache.set(cache_key, data, 120)
             return True, data
     return True, data
 
