@@ -39,14 +39,14 @@
     <div class=" container-fluid">
         <div class="clearfix row">
             <!-- Left menu-->
-            <div id="left-side" class="col-md-2 col-lg-2 hidden-sm hidden-xs">
+            <div id="left-side" class="col-md-2 col-lg-2 col-sm-3 col-xs-12">
 
                 {% include 'fyadmin/inclute/sitemenu.html' %}
 
 
             </div>
             <!-- Left menu end-->
-            <div class="col-md-9 col-lg-10">
+            <div class="col-md-9 col-lg-10 col-sm-9 col-xs-12">
                 {% if messages %}
                     {% for message in messages %}
                         {% ifequal message.tags 'error' %}
