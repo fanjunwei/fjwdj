@@ -79,17 +79,18 @@ def order():
 
 def order_for_user(user_pro, goods_sorter):
     ordered = False
+    fy_username = user_pro.get_fy_username()
+    fy_password = user_pro.get_fy_password()
     if user_pro.goodsId_list:
         enable_goodsId_list = user_pro.goodsId_list.split(',')
         mini_count = user_pro.mini_count
         for goods in goods_sorter:
             goodsId = goods.get('id')
             if goodsId in enable_goodsId_list:
-                checked, limit = fy_api.trading_limit(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId)
+                checked, limit = fy_api.trading_limit(fy_username, fy_password, goodsId)
                 if checked:
                     if limit >= mini_count:
-                        checked, errorMessage = fy_api.submit_order(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId,
-                                                                    limit)
+                        checked, errorMessage = fy_api.submit_order(fy_username, fy_password, goodsId, limit)
                         ordered = True
                         if checked:
                             TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
