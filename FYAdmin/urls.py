@@ -21,4 +21,5 @@ urlpatterns = patterns('fyadmin',
                        url(r'^money_supply/$', MoneySupplyView.as_view(), name='money_supply'),
                        url(r'^lend_order/(?P<goodsId>\w*?)$', LendingOrderView.as_view(), name='lend_order'),
                        url(r'^task_edit/$', TaskEditView.as_view(), name='task_edit'),
+                       url(r'^task_log_list/$', TaskLogListView.as_view(), name='task_log_list'),
 )

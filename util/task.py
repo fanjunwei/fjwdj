@@ -7,12 +7,12 @@ from time import sleep
 import thread
 import time
 import datetime
-from FYAdmin.models import FYUserProfile
+from FYAdmin.models import FYUserProfile, TaskLog
 from util import fy_api
 
 __author__ = u'范俊伟'
 
-GET_ALL_LIMIT_TIME = '16:11:00'
+GET_ALL_LIMIT_TIME = '16:10:00'
 run_get_all_limit_timestamp = 0
 
 ORDER_TIME = '16:14:45'
@@ -23,6 +23,7 @@ def task():
     while True:
         try:
             getAllLimit()
+            order()
         except:
             pass
         sleep(1)
@@ -61,8 +62,43 @@ def order():
 
     if now_timestamp >= start_timestamp and order_timestamp < start_timestamp:
         order_timestamp = now_timestamp
-        for user_pro in FYUserProfile.objects.all():
-            pass
+        checked, all_googds = fy_api.all_googds()
+        if checked:
+            goods_sorter = []
+            for item in all_googds:
+                goodsId = item.get('goodsId')
+                checked, googdsInfo = fy_api.get_money_info(goodsId, None)
+                if checked:
+                    goods_sorter.append(googdsInfo)
+            goods_sorter.sort(fy_api.goods_CMP)
+
+            for user_pro in FYUserProfile.objects.all():
+                if user_pro.enable_task:
+                    thread.start_new_thread(order_for_user, (user_pro, goods_sorter))
+
+
+def order_for_user(user_pro, goods_sorter):
+    if user_pro.goodsId_list:
+        enable_goodsId_list = user_pro.goodsId_list.split(',')
+        mini_count = user_pro.mini_count
+        for goods in goods_sorter:
+            goodsId = goods.get('id')
+            if goodsId in enable_goodsId_list:
+                checked, limit = fy_api.trading_limit(user_pro.fy_username, user_pro.fy_password, goodsId)
+                if checked:
+                    if limit >= mini_count:
+                        checked, errorMessage = fy_api.submit_order(user_pro.fy_username, user_pro.fy_password, goodsId,
+                                                                    limit)
+                        if checked:
+                            TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
+                        else:
+                            TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, count=limit,
+                                                   message=errorMessage)
+                        break
+
+                else:
+                    TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, message=limit)
+        TaskLog.objects.create(user=user_pro.user, state=0, message=u'没有匹配的货物')
 
 
 def startTask():

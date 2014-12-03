@@ -26,6 +26,10 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+DATE_FORMAT = 'Y-m-d'
+DATETIME_FORMAT = 'Y-m-d H:i:s'
+TIME_FORMAT = 'H:i:s'
+SHORT_DATETIME_FORMAT = 'y/m/d'
 
 
 # Application definition

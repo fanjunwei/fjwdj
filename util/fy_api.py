@@ -125,27 +125,33 @@ def cancel_order(username, password, orderId):
 
 
 def all_googds():
-    url = 'http://118.145.29.68:16850/quotation/quotecast/report_trading_market_all_prices'
-    data = {'_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
-    res_json = json.loads(r.text)
-    params = res_json.get('params', {})
-    tables = res_json.get('tables')
-    error_message = params.get('_message_', '')
-    if error_message:
-        return False, error_message
-    else:
-        res = []
-        columns = tables.get('goods', {}).get('columns', None)
-        if columns:
-            rows = tables.get('goods', {}).get('rows', None)
-            if rows:
-                for row in rows:
-                    item = {}
-                    for i in range(0, len(row)):
-                        item[columns[i]] = row[i]
-                    res.append(item)
-        return True, res
+    cache_key = 'all_googds'
+    data = cache.get(cache_key)
+    if data == None:
+        url = 'http://118.145.29.68:16850/quotation/quotecast/report_trading_market_all_prices'
+        data = {'_language_': 'zh'}
+        r = requests.post(url, data=data, verify=False)
+        res_json = json.loads(r.text)
+        params = res_json.get('params', {})
+        tables = res_json.get('tables')
+        error_message = params.get('_message_', '')
+        if error_message:
+            return False, error_message
+        else:
+            res = []
+            columns = tables.get('goods', {}).get('columns', None)
+            if columns:
+                rows = tables.get('goods', {}).get('rows', None)
+                if rows:
+                    for row in rows:
+                        item = {}
+                        for i in range(0, len(row)):
+                            item[columns[i]] = row[i]
+                        res.append(item)
+            data = res
+            cache.set(cache_key, data, 3600)
+
+    return True, data
 
 
 def get_money_info(goodsId, goodsName):
@@ -328,7 +334,7 @@ def submit_order(username, password, goodsId, order_count, my_type='money_begin'
     if error_message:
         return False, error_message
     else:
-        return True, int(params.get('limit', 0))
+        return True, ''
 
 
 def consolidated(username, password):

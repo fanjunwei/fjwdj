@@ -200,6 +200,10 @@ class FrameView(BaseView):
                     {'title': u'设置自动购买',
                      'icon': 'glyphicon-star',
                      'url': reverse('fyadmin:task_edit')},
+                    {'title': u'自动执行日志',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:task_log_list')},
+
                 ],
             },
         ]
@@ -531,7 +535,7 @@ class MoneySupplyView(FrameView):
     def get_context_data(self, **kwargs):
         cache_key = 'money_supply_view'
         data = cache.get(cache_key)
-        if not data:
+        if data == None:
             checked, res = fy_api.all_googds()
             if checked:
                 moneySupplyRequestedTotal = 0
@@ -657,10 +661,16 @@ class TaskEditView(FrameView):
     def post(self, request, *args, **kwargs):
         enable = request.REQUEST.get('enable', False)
         goodsIds = request.REQUEST.getlist('goodsId')
+        mini_count = request.REQUEST.get('mini_count', 3)
         if hasattr(self.request.user, 'fyuserprofile'):
             fyuserprofile = self.request.user.fyuserprofile
             fyuserprofile.enable_task = enable
             fyuserprofile.goodsId_list = ','.join(goodsIds)
+            try:
+                fyuserprofile.mini_count = int(mini_count)
+            except:
+                pass
+
             fyuserprofile.save()
             messages.success(request, u'设置成功')
         return self.get(request, *args, **kwargs)
@@ -695,6 +705,7 @@ class TaskEditView(FrameView):
 
                 data = {
                     'enable': fyuserprofile.enable_task,
+                    'mini_count': fyuserprofile.mini_count,
                     'height_goods_list': height_goods_list,
                     'normal_goods_list': normal_goods_list,
                 }
@@ -705,3 +716,11 @@ class TaskEditView(FrameView):
         else:
             messages.error(self.request, u'未设置泛亚账户')
         return super(TaskEditView, self).get_context_data(**kwargs)
+
+
+class TaskLogListView(BaseListView):
+    template_name = 'fyadmin/task_log_list.html'
+    title = u'自动执行日志'
+
+    def get_queryset(self):
+        return TaskLog.objects.filter(user=self.request.user).order_by('-time')
