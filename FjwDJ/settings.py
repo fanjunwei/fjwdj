@@ -49,7 +49,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -71,11 +71,11 @@ DATABASES = {
 }
 CACHES = {
     'default': {
-        #'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/var/tmp/django_cache',
         'TIMEOUT': 30,
-        'KEY_PREFIX':'fjw_dj',
+        'KEY_PREFIX': 'fjw_dj',
         'OPTIONS': {
             'MAX_ENTRIES': 2000,
             'CULL_FREQUENCY': 2,
@@ -98,7 +98,7 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_all')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     (os.path.join(os.path.dirname(__file__), '..', 'static').replace('\\', '/'),)
@@ -107,5 +107,5 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR,  'templates'),
+    os.path.join(BASE_DIR, 'templates'),
 )
