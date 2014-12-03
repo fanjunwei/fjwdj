@@ -78,6 +78,7 @@ def order():
 
 
 def order_for_user(user_pro, goods_sorter):
+    ordered = False
     if user_pro.goodsId_list:
         enable_goodsId_list = user_pro.goodsId_list.split(',')
         mini_count = user_pro.mini_count
@@ -89,6 +90,7 @@ def order_for_user(user_pro, goods_sorter):
                     if limit >= mini_count:
                         checked, errorMessage = fy_api.submit_order(user_pro.fy_username, user_pro.fy_password, goodsId,
                                                                     limit)
+                        ordered = True
                         if checked:
                             TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
                         else:
@@ -98,7 +100,8 @@ def order_for_user(user_pro, goods_sorter):
 
                 else:
                     TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, message=limit)
-        TaskLog.objects.create(user=user_pro.user, state=0, message=u'没有匹配的货物')
+        if not ordered:
+            TaskLog.objects.create(user=user_pro.user, state=0, message=u'没有匹配的货物')
 
 
 def startTask():
