@@ -53,8 +53,8 @@ def trading_limit(request):
     try:
         goodsID = request.REQUEST.get('id')
         if hasattr(request.user, 'fyuserprofile'):
-            checked, res = fy_api.trading_limit(request.user.fyuserprofile.fy_username,
-                                                request.user.fyuserprofile.fy_password, goodsID)
+            checked, res = fy_api.trading_limit(request.user.fyuserprofile.get_fy_username(),
+                                                request.user.fyuserprofile.get_fy_password(), goodsID)
 
             if checked:
                 if res < 10:
@@ -435,8 +435,8 @@ class CashSummaryView(FrameView):
 
     def get_context_data(self, **kwargs):
         if hasattr(self.request.user, 'fyuserprofile'):
-            checked, res = fy_api.cash_summary(self.request.user.fyuserprofile.fy_username,
-                                               self.request.user.fyuserprofile.fy_password)
+            checked, res = fy_api.cash_summary(self.request.user.fyuserprofile.get_fy_username(),
+                                               self.request.user.fyuserprofile.get_fy_password())
             if checked:
                 object_list = []
                 appendMoneyItem(res, object_list, u'期初资金', 'initialBalance')
@@ -493,8 +493,8 @@ class PendingOrdersView(FrameView):
         selected_ids = request.REQUEST.getlist('id')
         if '__action_delete' in request.POST:
             if hasattr(self.request.user, 'fyuserprofile'):
-                fy_username = self.request.user.fyuserprofile.fy_username
-                fy_password = self.request.user.fyuserprofile.fy_password
+                fy_username = self.request.user.fyuserprofile.get_fy_username()
+                fy_password = self.request.user.fyuserprofile.get_fy_password()
 
                 error = False
                 if selected_ids:
@@ -514,8 +514,8 @@ class PendingOrdersView(FrameView):
 
     def get_context_data(self, **kwargs):
         if hasattr(self.request.user, 'fyuserprofile'):
-            checked, res = fy_api.pending_orders(self.request.user.fyuserprofile.fy_username,
-                                                 self.request.user.fyuserprofile.fy_password)
+            checked, res = fy_api.pending_orders(self.request.user.fyuserprofile.get_fy_username(),
+                                                 self.request.user.fyuserprofile.get_fy_password())
             if checked:
                 data = {
                     'object_list': res
@@ -554,8 +554,8 @@ class MoneySupplyView(FrameView):
                                 moneySupplyTotal += int(googdsInfo['m2'])
                             '''
                             if hasattr(self.request.user, 'fyuserprofile'):
-                                checked, res = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
-                                                                    self.request.user.fyuserprofile.fy_password,
+                                checked, res = fy_api.trading_limit(self.request.user.fyuserprofile.get_fy_username(),
+                                                                    self.request.user.fyuserprofile.get_fy_password(),
                                                                     goodsId)
 
                                 if checked:
@@ -594,8 +594,8 @@ class LendingOrderView(FrameFormView):
         my_type = self.form.cleaned_data.get('my_type')
         order_count = self.form.cleaned_data.get('order_count')
         if hasattr(self.request.user, 'fyuserprofile'):
-            checked, res = fy_api.submit_order(self.request.user.fyuserprofile.fy_username,
-                                               self.request.user.fyuserprofile.fy_password,
+            checked, res = fy_api.submit_order(self.request.user.fyuserprofile.get_fy_username(),
+                                               self.request.user.fyuserprofile.get_fy_password(),
                                                goodsId, order_count, my_type)
 
             if not checked:
@@ -618,13 +618,13 @@ class LendingOrderView(FrameFormView):
                 data['moneySupply'] = goodsInfo.get('moneySupply')
                 data['recommendation'] = goodsInfo.get('recommendation')
                 data['financePrice'] = goodsInfo.get('financePrice')
-                checked, limit = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
-                                                      self.request.user.fyuserprofile.fy_password,
+                checked, limit = fy_api.trading_limit(self.request.user.fyuserprofile.get_fy_username(),
+                                                      self.request.user.fyuserprofile.get_fy_password(),
                                                       goodsId)
                 if checked:
                     data['limit'] = limit
-                checked, limit_end = fy_api.trading_limit(self.request.user.fyuserprofile.fy_username,
-                                                          self.request.user.fyuserprofile.fy_password,
+                checked, limit_end = fy_api.trading_limit(self.request.user.fyuserprofile.get_fy_username(),
+                                                          self.request.user.fyuserprofile.get_fy_password(),
                                                           goodsId, 'money_end')
                 if checked:
                     data['limit_end'] = limit_end
@@ -640,8 +640,8 @@ class ConsolidatedView(FrameView):
 
     def get_context_data(self, **kwargs):
         if hasattr(self.request.user, 'fyuserprofile'):
-            checked, res = fy_api.consolidated(self.request.user.fyuserprofile.fy_username,
-                                               self.request.user.fyuserprofile.fy_password)
+            checked, res = fy_api.consolidated(self.request.user.fyuserprofile.get_fy_username(),
+                                               self.request.user.fyuserprofile.get_fy_password())
             if checked:
                 data = {
                     'object_list': res

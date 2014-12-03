@@ -4,9 +4,11 @@ from django.db import models
 
 # Create your models here.
 from django.core.signing import Signer
+from util.rc4 import RC4
 
 
 class FYUserProfile(models.Model):
+    key = 'sdfcs32vader32cvxae3v>sdcSD#2dvcs'
     user = models.OneToOneField(User)
     fy_username = models.CharField(unique=True, max_length=255, verbose_name=u'泛亚账号')
     fy_password = models.CharField(max_length=255, verbose_name=u'泛亚密码')
@@ -15,16 +17,20 @@ class FYUserProfile(models.Model):
     mini_count = models.IntegerField(verbose_name=u'最少购买量', default=3)
 
     def get_fy_username(self):
-        return self.fy_username
+        rc4 = RC4(key=self.key)
+        return rc4.decry(self.fy_username)
 
     def set_fy_username(self, value):
-        self.fy_username = value
+        rc4 = RC4(key=self.key)
+        self.fy_username = rc4.crypt(value)
 
     def get_fy_password(self):
-        return self.fy_password
+        rc4 = RC4(key=self.key)
+        return rc4.decry(self.fy_password)
 
     def set_fy_password(self, value):
-        self.fy_password = value
+        rc4 = RC4(key=self.key)
+        self.fy_password = rc4.crypt(value)
 
 
 class TaskLog(models.Model):
