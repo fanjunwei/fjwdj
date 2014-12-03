@@ -230,7 +230,7 @@ def goods_CMP(v1, v2):
     return -cmp(r1, r2)
 
 
-def trading_limit(username, password, goodsId, my_type='money_begin'):
+def trading_limit(username, password, goodsId, my_type='money_begin', reset=False):
     '''
 
     :param username:
@@ -241,7 +241,7 @@ def trading_limit(username, password, goodsId, my_type='money_begin'):
     '''
     cache_key = "trading_limit%s%s%s%s" % (username, password, goodsId, my_type)
     data = cache.get(cache_key)
-    if not data:
+    if data == None or reset:
         if my_type == 'money_begin':
             method = 'LEND'
             action = 'ACQUIRE'
@@ -277,7 +277,7 @@ def trading_limit(username, password, goodsId, my_type='money_begin'):
             return False, error_message
         else:
             data = int(params.get('limit', 0))
-            cache.set(cache_key, data, 120)
+            cache.set(cache_key, data, 300)
             return True, data
     return True, data
 

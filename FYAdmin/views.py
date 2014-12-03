@@ -197,8 +197,10 @@ class FrameView(BaseView):
                     {'title': u'资金配比',
                      'icon': 'glyphicon-star',
                      'url': reverse('fyadmin:money_supply')},
+                    {'title': u'设置自动购买',
+                     'icon': 'glyphicon-star',
+                     'url': reverse('fyadmin:task_edit')},
                 ],
-
             },
         ]
 
@@ -646,3 +648,60 @@ class ConsolidatedView(FrameView):
         else:
             messages.error(self.request, u'未设置泛亚账户')
         return super(ConsolidatedView, self).get_context_data(**kwargs)
+
+
+class TaskEditView(FrameView):
+    template_name = 'fyadmin/task_edit.html'
+    title = u'自动购买最高比例'
+
+    def post(self, request, *args, **kwargs):
+        enable = request.REQUEST.get('enable', False)
+        goodsIds = request.REQUEST.getlist('goodsId')
+        if hasattr(self.request.user, 'fyuserprofile'):
+            fyuserprofile = self.request.user.fyuserprofile
+            fyuserprofile.enable_task = enable
+            fyuserprofile.goodsId_list = ','.join(goodsIds)
+            fyuserprofile.save()
+            messages.success(request, u'设置成功')
+        return self.get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        height_goodsIds = ['IN', 'GE', 'CO', 'APT']
+        if hasattr(self.request.user, 'fyuserprofile'):
+            checked, all_goods = fy_api.all_googds()
+            if checked:
+                fyuserprofile = self.request.user.fyuserprofile
+                enable_goodsId_list = []
+                height_goods_list = []
+                normal_goods_list = []
+                if fyuserprofile.goodsId_list:
+                    enable_goodsId_list = fyuserprofile.goodsId_list.split(',')
+
+                for goods in all_goods:
+                    item = {}
+                    goodsId = goods.get('goodsId')
+                    goodsName = goods.get('goodsName')
+                    if goodsId in enable_goodsId_list:
+                        selected = True
+                    else:
+                        selected = False
+                    item['goodsId'] = goodsId
+                    item['goodsName'] = goodsName
+                    item['selected'] = selected
+                    if goodsId in height_goodsIds:
+                        height_goods_list.append(item)
+                    else:
+                        normal_goods_list.append(item)
+
+                data = {
+                    'enable': fyuserprofile.enable_task,
+                    'height_goods_list': height_goods_list,
+                    'normal_goods_list': normal_goods_list,
+                }
+                kwargs.update(data)
+            else:
+                messages.error(self.request, all_goods)
+
+        else:
+            messages.error(self.request, u'未设置泛亚账户')
+        return super(TaskEditView, self).get_context_data(**kwargs)

@@ -1,8 +1,10 @@
 from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
-admin.autodiscover()
+from util.task import startTask
 
+admin.autodiscover()
+startTask()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'FjwDJ.views.home', name='home'),

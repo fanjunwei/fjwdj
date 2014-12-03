@@ -1,0 +1,42 @@
+{% extends 'fyadmin/frame_edit.html' %}
+{% block fields %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10 controls">
+            <label class="text-primary">
+                <input type="checkbox" id="enable" name="enable"{% if enable %}
+                       checked="checked" {% endif %}> 启用自动购买
+            </label>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+
+        <label class="col-sm-2 control-label">选择货物</label>
+
+        <div class="col-sm-10 controls">
+            {% for goods in height_goods_list %}
+                <label>
+                    <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
+                            {% if goods.selected %}
+                           checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
+                </label>
+                <br>
+            {% endfor %}
+            <br>
+            {% for goods in normal_goods_list %}
+                <label>
+                    <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
+                            {% if goods.selected %}
+                           checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
+                </label>
+                <br>
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}
+{% block buttons %}
+    <button type="submit" class="btn btn-primary">确定</button>
+{% endblock %}
+
