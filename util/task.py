@@ -2,6 +2,7 @@
 # Date: 14/12/3
 # Time: 12:20
 # Email:fanjunwei003@163.com
+import os
 
 from time import sleep
 import thread
@@ -10,6 +11,7 @@ import datetime
 from FYAdmin.models import FYUserProfile, TaskLog
 from util import fy_api
 import logging
+import fcntl
 
 __author__ = u'范俊伟'
 
@@ -21,6 +23,12 @@ order_timestamp = 0
 
 
 def task():
+    BASE_DIR = os.path.dirname(__file__)
+    lock_file_path = os.path.join(BASE_DIR, 'task.lock')
+    fp = open(lock_file_path, 'w')
+    fcntl.flock(fp, fcntl.LOCK_EX)
+    log = logging.getLogger('task')
+    log.info('==============================startTask=======================================')
     while True:
         try:
             getAllLimit()
@@ -28,6 +36,8 @@ def task():
         except:
             pass
         sleep(1)
+    fcntl.flock(fp, fcntl.LOCK_UN)
+    fp.close()
 
 
 def getAllLimit():
@@ -111,8 +121,6 @@ def order_for_user(user_pro, goods_sorter):
 
 def startTask():
     global run_get_all_limit_timestamp, order_timestamp
-    log = logging.getLogger('task')
-    log.info('==============================startTask=======================================')
     now = datetime.datetime.now()
     now_timestamp = time.mktime(now.timetuple())
     run_get_all_limit_timestamp = now_timestamp
