@@ -111,6 +111,8 @@ def order_for_user(user_pro, goods_sorter):
 
 def startTask():
     global run_get_all_limit_timestamp, order_timestamp
+    log = logging.getLogger('task')
+    log.info('==============================startTask=======================================')
     now = datetime.datetime.now()
     now_timestamp = time.mktime(now.timetuple())
     run_get_all_limit_timestamp = now_timestamp

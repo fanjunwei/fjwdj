@@ -133,8 +133,10 @@ LOGGING = {
         },
         'task': {
             'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': '/var/log/fy_django/task.log',
+            #'class': 'logging.handlers.TimedRotatingFileHandler',
+            #'filename': '/var/log/fy_django/task.log',
+            'class': 'logging.StreamHandler',
+            #'class': 'django.utils.log.NullHandler',
             'formatter': 'verbose',
         },
     },
