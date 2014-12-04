@@ -31,8 +31,8 @@ def task():
     log.info('==============================startTask=======================================')
     while True:
         try:
-            getAllLimit()
-            order()
+            getAllLimitCheckTime()
+            orderCheckTime()
         except:
             pass
         sleep(1)
@@ -40,7 +40,7 @@ def task():
     fp.close()
 
 
-def getAllLimit():
+def getAllLimitCheckTime():
     global run_get_all_limit_timestamp
     log = logging.getLogger('task')
     log.info('getAllLimit check')
@@ -53,16 +53,21 @@ def getAllLimit():
 
     if now_timestamp >= start_timestamp and run_get_all_limit_timestamp < start_timestamp:
         run_get_all_limit_timestamp = now_timestamp
-        log.info('getAllLimit run')
-        checked, all_goods = fy_api.all_googds()
-        if checked:
-            for user_pro in FYUserProfile.objects.all():
-                for goods in all_goods:
-                    goodsId = goods.get('goodsId')
-                    fy_api.trading_limit(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId, reset=True)
+        getAllLimitRun()
 
 
-def order():
+def getAllLimitRun():
+    log = logging.getLogger('task')
+    log.info('getAllLimit run')
+    checked, all_goods = fy_api.all_googds()
+    if checked:
+        for user_pro in FYUserProfile.objects.all():
+            for goods in all_goods:
+                goodsId = goods.get('goodsId')
+                fy_api.trading_limit(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId, reset=True)
+
+
+def orderCheckTime():
     global order_timestamp
     log = logging.getLogger('task')
     log.info('order check')
@@ -75,20 +80,24 @@ def order():
 
     if now_timestamp >= start_timestamp and order_timestamp < start_timestamp:
         order_timestamp = now_timestamp
-        log.info('order run')
-        checked, all_googds = fy_api.all_googds()
-        if checked:
-            goods_sorter = []
-            for item in all_googds:
-                goodsId = item.get('goodsId')
-                checked, googdsInfo = fy_api.get_money_info(goodsId, None)
-                if checked:
-                    goods_sorter.append(googdsInfo)
-            goods_sorter.sort(fy_api.goods_CMP)
+        orderRun()
 
-            for user_pro in FYUserProfile.objects.all():
-                if user_pro.enable_task:
-                    thread.start_new_thread(order_for_user, (user_pro, goods_sorter))
+
+def orderRun():
+    log = logging.getLogger('task')
+    log.info('order run')
+    checked, all_googds = fy_api.all_googds()
+    if checked:
+        goods_sorter = []
+        for item in all_googds:
+            goodsId = item.get('goodsId')
+            checked, googdsInfo = fy_api.get_money_info(goodsId, None)
+            if checked:
+                goods_sorter.append(googdsInfo)
+        goods_sorter.sort(fy_api.goods_CMP)
+
+        for user_pro in FYUserProfile.objects.filter(enable_task=True):
+            thread.start_new_thread(order_for_user, (user_pro, goods_sorter))
 
 
 def order_for_user(user_pro, goods_sorter):
@@ -126,7 +135,3 @@ def startTask():
     run_get_all_limit_timestamp = now_timestamp
     order_timestamp = now_timestamp
     thread.start_new_thread(task, ())
-
-
-if __name__ == '__main__':
-    getAllLimit()
