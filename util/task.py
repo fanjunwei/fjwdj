@@ -9,6 +9,7 @@ import time
 import datetime
 from FYAdmin.models import FYUserProfile, TaskLog
 from util import fy_api
+import logging
 
 __author__ = u'范俊伟'
 
@@ -31,7 +32,8 @@ def task():
 
 def getAllLimit():
     global run_get_all_limit_timestamp
-
+    log = logging.getLogger('task')
+    log.info('getAllLimit check')
     now = datetime.datetime.now()
     start = datetime.datetime.strptime(GET_ALL_LIMIT_TIME, "%H:%M:%S")
     start = datetime.datetime(now.year, now.month, now.day, hour=start.hour, minute=start.minute,
@@ -41,7 +43,7 @@ def getAllLimit():
 
     if now_timestamp >= start_timestamp and run_get_all_limit_timestamp < start_timestamp:
         run_get_all_limit_timestamp = now_timestamp
-
+        log.info('getAllLimit run')
         checked, all_goods = fy_api.all_googds()
         if checked:
             for user_pro in FYUserProfile.objects.all():
@@ -52,7 +54,8 @@ def getAllLimit():
 
 def order():
     global order_timestamp
-
+    log = logging.getLogger('task')
+    log.info('order check')
     now = datetime.datetime.now()
     start = datetime.datetime.strptime(ORDER_TIME, "%H:%M:%S")
     start = datetime.datetime(now.year, now.month, now.day, hour=start.hour, minute=start.minute,
@@ -62,6 +65,7 @@ def order():
 
     if now_timestamp >= start_timestamp and order_timestamp < start_timestamp:
         order_timestamp = now_timestamp
+        log.info('order run')
         checked, all_googds = fy_api.all_googds()
         if checked:
             goods_sorter = []

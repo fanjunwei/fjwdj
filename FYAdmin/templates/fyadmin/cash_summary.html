@@ -1,14 +1,14 @@
 {% extends 'fyadmin/frame.html' %}
 
 {% block content %}
-    <div style="max-width: 350px;margin: auto">
+    <div class="container-fluid">
         {% for object in object_list %}
             {% if object %}
                 <div class="row">
-                    <div class="col-md-6 text-right">
+                    <div class="col-md-6 col-xs-6 text-right">
                         {{ object.0 }}
                     </div>
-                    <div class="col-md-6 text-right">
+                    <div class="col-md-3 col-xs-6 text-right">
                         {{ object.1 }}
                     </div>
                 </div>
