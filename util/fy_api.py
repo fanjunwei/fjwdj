@@ -125,6 +125,7 @@ def cancel_order(username, password, orderId):
 
 
 def all_googds():
+    exclude_goodsId = ['TS100', 'TS200', 'TS500', 'TS1000']
     cache_key = 'all_googds'
     data = cache.get(cache_key)
     if data == None:
@@ -147,7 +148,8 @@ def all_googds():
                         item = {}
                         for i in range(0, len(row)):
                             item[columns[i]] = row[i]
-                        res.append(item)
+                        if not item.get('goodsId') in exclude_goodsId:
+                            res.append(item)
             data = res
             cache.set(cache_key, data, 3600)
 
