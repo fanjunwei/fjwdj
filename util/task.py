@@ -3,6 +3,7 @@
 # Time: 12:20
 # Email:fanjunwei003@163.com
 import os
+import threading
 
 from time import sleep
 import thread
@@ -20,6 +21,23 @@ run_get_all_limit_timestamp = 0
 
 ORDER_TIME = '16:14:45'
 order_timestamp = 0
+
+countLock = threading.RLock()
+thread_run_count = 0
+
+
+def addCount():
+    global thread_run_count
+    countLock.acquire()
+    thread_run_count += 1
+    countLock.release()
+
+
+def subCount():
+    global thread_run_count
+    countLock.acquire()
+    thread_run_count -= 1
+    countLock.release()
 
 
 def task():
@@ -83,7 +101,7 @@ def orderCheckTime():
         orderRun()
 
 
-def orderRun():
+def orderRun(wait=False):
     log = logging.getLogger('task')
     log.info('order run')
     checked, all_googds = fy_api.all_googds()
@@ -97,39 +115,47 @@ def orderRun():
         goods_sorter.sort(fy_api.goods_CMP)
 
         for user_pro in FYUserProfile.objects.filter(enable_task=True):
+            addCount()
             thread.start_new_thread(order_for_user, (user_pro, goods_sorter))
+    if wait:
+        while thread_run_count > 0:
+            time.sleep(1)
 
 
 def order_for_user(user_pro, goods_sorter):
-    ordered = False
-    fy_username = user_pro.get_fy_username()
-    fy_password = user_pro.get_fy_password()
-    if user_pro.goodsId_list:
-        enable_goodsId_list = user_pro.goodsId_list.split(',')
-        mini_count = user_pro.mini_count
-        for goods in goods_sorter:
-            goodsId = goods.get('id')
-            if goodsId in enable_goodsId_list:
-                checked, limit = fy_api.trading_limit(fy_username, fy_password, goodsId)
-                if checked:
-                    if limit >= mini_count:
-                        checked, errorMessage = fy_api.submit_order(fy_username, fy_password, goodsId, limit)
-                        ordered = True
-                        if checked:
-                            TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
-                        else:
-                            TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, count=limit,
-                                                   message=errorMessage)
-                        break
+    try:
+        ordered = False
+        fy_username = user_pro.get_fy_username()
+        fy_password = user_pro.get_fy_password()
+        if user_pro.goodsId_list:
+            enable_goodsId_list = user_pro.goodsId_list.split(',')
+            mini_count = user_pro.mini_count
+            for goods in goods_sorter:
+                goodsId = goods.get('id')
+                if goodsId in enable_goodsId_list:
+                    checked, limit = fy_api.trading_limit(fy_username, fy_password, goodsId)
+                    if checked:
+                        if limit >= mini_count:
+                            checked, errorMessage = fy_api.submit_order(fy_username, fy_password, goodsId, limit)
+                            ordered = True
+                            if checked:
+                                TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
+                            else:
+                                TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, count=limit,
+                                                       message=errorMessage)
+                            break
 
-                else:
-                    TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, message=limit)
-        if not ordered:
-            TaskLog.objects.create(user=user_pro.user, state=0, message=u'没有匹配的货物')
+                    else:
+                        TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, message=limit)
+            if not ordered:
+                TaskLog.objects.create(user=user_pro.user, state=0, message=u'没有匹配的货物')
+    finally:
+        subCount()
 
 
 def startTask():
     global run_get_all_limit_timestamp, order_timestamp
+    return
     now = datetime.datetime.now()
     now_timestamp = time.mktime(now.timetuple())
     run_get_all_limit_timestamp = now_timestamp

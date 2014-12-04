@@ -12,7 +12,7 @@ __author__ = u'范俊伟'
 class Command(BaseCommand):
     def handle(self, *args, **options):
         print 'orderRun'
-        orderRun()
+        orderRun(wait=True)
 
 
 
