@@ -82,7 +82,7 @@ def getAllLimitRun():
         for user_pro in FYUserProfile.objects.all():
             for goods in all_goods:
                 goodsId = goods.get('goodsId')
-                fy_api.trading_limit(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId, reset=True)
+                fy_api.trading_limit(user_pro.get_fy_username(), user_pro.get_fy_password(), goodsId)
 
 
 def orderCheckTime():
@@ -133,7 +133,7 @@ def order_for_user(user_pro, goods_sorter):
             for goods in goods_sorter:
                 goodsId = goods.get('id')
                 if goodsId in enable_goodsId_list:
-                    checked, limit = fy_api.trading_limit(fy_username, fy_password, goodsId)
+                    checked, limit = fy_api.trading_limit(fy_username, fy_password, goodsId, for_cache=True)
                     if checked:
                         if limit >= mini_count:
                             checked, errorMessage = fy_api.submit_order(fy_username, fy_password, goodsId, limit)
