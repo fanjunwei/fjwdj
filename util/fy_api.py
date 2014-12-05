@@ -24,19 +24,29 @@ def login(username, password):
         return False, res_json.get('params', {}).get('_message_', '')
 
 
+def format_money(raw):
+    if raw == None or raw == '':
+        return None
+    else:
+        return format(float(raw) / 100.0, ',.2f')
+
+
 def cash_summary(username, password):
     url = 'https://118.145.29.67:16831/portal/account/report_cash_summary'
     data = {'_password_': password,
             'merchantId': username,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
-    res_json = json.loads(r.text)
-    params = res_json.get('params', {})
-    error_message = params.get('_message_', '')
-    if error_message:
-        return False, error_message
+    r = requests.post(url, data=data, verify=False, timeout=5)
+    if r.ok:
+        res_json = json.loads(r.text)
+        params = res_json.get('params', {})
+        error_message = params.get('_message_', '')
+        if error_message:
+            return False, error_message
+        else:
+            return True, params
     else:
-        return True, params
+        return False, r.reason
 
 
 def pending_orders(username, password):
