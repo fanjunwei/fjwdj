@@ -51,7 +51,9 @@ QQ：81300697
     if user != None:
         helperText += u'\n'
         helperText += u'''回复3：获取账户资金
-回复4：获取近一周自动购买记录'''
+回复4：获取资产总汇
+回复5：获取近一周自动购买记录
+'''
     return helperText
 
 
@@ -94,6 +96,29 @@ def message_task_log(user):
     return res
 
 
+def message_consolidated(user):
+    message = u''
+    if hasattr(user, 'fyuserprofile'):
+        checked, res = fy_api.consolidated(user.fyuserprofile.get_fy_username(),
+                                           user.fyuserprofile.get_fy_password())
+        if checked:
+            for i in res:
+                message += u'货物:%s%s\n' % (i.get('goodsName'), i.get('goodsId'))
+                message += u'类型:%s\n' % (i.get('my_type'))
+                message += u'成交价:%s\n' % (i.get('price'))
+                message += u'数量:%s\n' % (i.get('quantity'))
+                message += u'受托价格逆短:%s\n' % (i.get('lendingDiff'))
+                message += u'买卖(申报)逆短:%s\n' % (i.get('orderingDiff'))
+                message += u'=================\n'
+
+        else:
+            message = u'未设置泛亚账户'
+    else:
+        message = u'未设置泛亚账户'
+
+    return message
+
+
 def responseMsg(request, wechat):
     res = ''
     wechat.parse_data(request.body)
@@ -122,6 +147,8 @@ def responseMsg(request, wechat):
             elif message.content == '3' and user != None:
                 res = wechat.response_text(message_cash_summary(user))
             elif message.content == '4' and user != None:
+                res = wechat.response_text(message_consolidated(user))
+            elif message.content == '5' and user != None:
                 res = wechat.response_text(message_task_log(user))
     elif weixinUser.current_state == 1:
         if message.type == 'text':
