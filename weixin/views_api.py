@@ -54,9 +54,48 @@ QQ：81300697
     if user != None:
         helperText += u'''回复3：获取账户资金
 回复4：获取资产总汇
-回复5：获取近一周自动购买记录
-'''
+回复5：获取近一周自动购买记录\n'''
+
+    helperText += u'回复货物代码查询相关信息\n'
     return helperText
+
+
+def get_all_goodsId():
+    all_ids = []
+    checked, all_googds = fy_api.all_googds()
+    if checked:
+        for item in all_googds:
+            goodsId = item.get('goodsId')
+            all_ids.append(goodsId)
+
+    return all_ids
+
+
+def get_goods_info(content, user):
+    goodsId = content.upper()
+    if goodsId in get_all_goodsId():
+        res = u'%s信息\n' % goodsId
+        checked, googdsInfo = fy_api.get_money_info(goodsId, None)
+        if checked:
+            ratio_format = googdsInfo.get('ratio_format')
+            if ratio_format:
+                res += u'资金配比:%s\n' % (googdsInfo.get('ratio_format'))
+        if user:
+            if hasattr(user, 'fyuserprofile'):
+                fyuserprofile = user.fyuserprofile
+                checked, limit = fy_api.trading_limit(fyuserprofile.get_fy_username(), fyuserprofile.get_fy_password(),
+                                                      goodsId, 'money_begin')
+                if checked:
+                    res += u'资金受托可申报量:%d\n' % (limit)
+
+                checked, limit = fy_api.trading_limit(fyuserprofile.get_fy_username(), fyuserprofile.get_fy_password(),
+                                                      goodsId, 'money_end')
+                if checked:
+                    res += u'资金受托可了结量:%d\n' % (limit)
+        return res
+
+    else:
+        return None
 
 
 def message_cash_summary(user):
@@ -162,6 +201,10 @@ def responseMsg(request, wechat):
                 res = wechat.response_text(message_consolidated(user))
             elif message.content == '5' and user != None:
                 res = wechat.response_text(message_task_log(user))
+            else:
+                message = get_goods_info(message.content, user)
+                if message:
+                    res = wechat.response_text(message)
     elif weixinUser.current_state == 1:
         if message.type == 'text':
             if weixinUser.current_sub_state == 0:
