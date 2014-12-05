@@ -20,7 +20,7 @@ def handleRequest(request):
     nonce = request.GET.get("nonce", '')
     wechat = WechatBasic(token=TOKEN)
     if request.method == 'GET':
-        echoStr = request.GET.get("echostr", None)
+        echoStr = request.GET.get("echostr", '')
         if wechat.check_signature(signature, timestamp, nonce):
             response = HttpResponse(echoStr, content_type="text/plain")
         else:
@@ -34,7 +34,7 @@ def handleRequest(request):
 
         return response
     else:
-        return None
+        return HttpResponse('', content_type="application/xml")
 
 
 def getHelperText(weixinUser, user):
