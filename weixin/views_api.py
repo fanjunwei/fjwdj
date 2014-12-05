@@ -1,9 +1,11 @@
 # coding=utf-8
 # Date:2014/9/24
 # Email:wangjian2254@gmail.com
+import datetime
 from django.contrib.auth.models import User
 
 from django.core.cache import cache
+from FYAdmin.models import TaskLog
 from fy.fy_query import getFyMoneySupply
 from util import fy_api
 from wechat_sdk import WechatBasic
@@ -69,6 +71,26 @@ def message_cash_summary(user):
     return res
 
 
+def format_time(time):
+    return time.strftime('%Y-%m-%d %H:%M:%S')
+
+
+def message_task_log(user):
+    res = ''
+
+    fyuserprofile = user.fyuserprofile
+    start_time = datetime.datetime.now() - datetime.timedelta(days=7)
+    logs = TaskLog.objects.filter(time__gt=start_time, user=user)
+
+    for log in logs:
+        if log.state == 1:
+            res += u'%s,成功购买%d手%s\n' % (format_time(log.time), log.count, log.goodsId)
+        else:
+            res += u'%s,失败,%s\n' % (format_time(log.time), log.message)
+
+    return res
+
+
 def responseMsg(request, wechat):
     res = ''
     wechat.parse_data(request.body)
@@ -96,7 +118,8 @@ def responseMsg(request, wechat):
                 res = wechat.response_text(u'请输入管理账号')
             elif message.content == '3' and user != None:
                 res = wechat.response_text(message_cash_summary(user))
-
+            elif message.content == '4' and user != None:
+                res = wechat.response_text(message_task_log(user))
     elif weixinUser.current_state == 1:
         if message.type == 'text':
             if weixinUser.current_sub_state == 0:
