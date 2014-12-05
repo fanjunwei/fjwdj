@@ -102,14 +102,19 @@ def message_consolidated(user):
         checked, res = fy_api.consolidated(user.fyuserprofile.get_fy_username(),
                                            user.fyuserprofile.get_fy_password())
         if checked:
-            for i in res:
-                message += u'货物:%s%s\n' % (i.get('goodsName'), i.get('goodsId'))
-                message += u'类型:%s\n' % (i.get('my_type'))
-                message += u'成交价:%s\n' % (i.get('price'))
-                message += u'数量:%s\n' % (i.get('quantity'))
-                message += u'受托价格逆短:%s\n' % (i.get('lendingDiff'))
-                message += u'买卖(申报)逆短:%s\n' % (i.get('orderingDiff'))
-                message += u'=================\n'
+            if (len(res) > 0):
+                message = u'交易资产总汇\n'
+                for i in res:
+                    message += u'=================\n'
+                    message += u'货物:%s%s\n' % (i.get('goodsName'), i.get('goodsId'))
+                    message += u'类型:%s\n' % (i.get('my_type'))
+                    message += u'成交价:%s\n' % (i.get('price'))
+                    message += u'数量:%s\n' % (i.get('quantity'))
+                    message += u'受托价格逆短:%s\n' % (i.get('lendingDiff'))
+                    message += u'买卖(申报)逆短:%s\n' % (i.get('orderingDiff'))
+
+            else:
+                message = u'无数据'
 
         else:
             message = u'未设置泛亚账户'
