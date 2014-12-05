@@ -48,8 +48,8 @@ QQ：81300697
 回复2：绑定管理账号'''
     if user != None:
         helperText += u'\n'
-        helperText += u'''回复3:获取账户资金
-回复4:获取近一周自动购买记录'''
+        helperText += u'''回复3：获取账户资金
+回复4：获取近一周自动购买记录'''
     return helperText
 
 
@@ -59,8 +59,8 @@ def message_cash_summary(user):
         checked, cash_summary = fy_api.cash_summary(user.fyuserprofile.get_fy_username(),
                                                     user.fyuserprofile.get_fy_password())
         if checked:
-            res += u'资金权益:%s\n' + fy_api.format_money(cash_summary.get('cashValue'))
-            res += u'货物权益:%s\n' + fy_api.format_money(cash_summary.get('goodsValue'))
+            res += u'资金权益:%s\n' % fy_api.format_money(cash_summary.get('cashValue'))
+            res += u'货物权益:%s\n' % fy_api.format_money(cash_summary.get('goodsValue'))
         else:
             res = cash_summary
     else:
@@ -70,6 +70,7 @@ def message_cash_summary(user):
 
 
 def responseMsg(request, wechat):
+    res = ''
     wechat.parse_data(request.body)
     message = wechat.get_message()
     weixinUser, user = checkWeixinuser(message.source)
@@ -86,22 +87,22 @@ def responseMsg(request, wechat):
             weixinmsg.save()
             if message.content == '1':
                 try:
-                    return wechat.response_text(getFyMoneySupply().decode('utf8'))
+                    res = wechat.response_text(getFyMoneySupply().decode('utf8'))
                 except Exception, e:
                     print str(e)
             elif message.content == '2':
                 weixinUser.current_state = 1
                 weixinUser.current_sub_state = 0
-                return wechat.response_text(u'请输入管理账号')
+                res = wechat.response_text(u'请输入管理账号')
             elif message.content == '3' and user != None:
-                return wechat.response_text(message_cash_summary(user))
+                res = wechat.response_text(message_cash_summary(user))
 
     elif weixinUser.current_state == 1:
         if message.type == 'text':
             if weixinUser.current_sub_state == 0:
                 weixinUser.state_parm = message.content
                 weixinUser.current_sub_state = 1
-                return wechat.response_text(u'请输入密码')
+                res = wechat.response_text(u'请输入密码')
             elif weixinUser.current_sub_state == 1:
                 username = weixinUser.state_parm
                 password = message.content
@@ -110,13 +111,15 @@ def responseMsg(request, wechat):
                 weixinUser.current_state = 0
                 weixinUser.current_sub_state = 0
                 if not user or not user.is_active:
-                    return wechat.response_text(u'用户或密码错误')
+                    res = wechat.response_text(u'用户或密码错误')
                 else:
                     weixinUser.user_id = user.pk
-                    return wechat.response_text(u'绑定成功\n' + getHelperText(weixinUser, user))
+                    res = wechat.response_text(u'绑定成功\n' + getHelperText(weixinUser, user))
 
     weixinUser.save()
-    return wechat.response_text(getHelperText(weixinUser, user))
+    if not res:
+        res = wechat.response_text(getHelperText(weixinUser, user))
+    return res
 
 
 def checkWeixinuser(weixinid):
