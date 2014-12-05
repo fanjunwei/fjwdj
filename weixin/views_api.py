@@ -43,14 +43,14 @@ def getHelperText(weixinUser, user):
         helperText += u'欢迎:' + user.first_name + u'\n'
 
     helperText += u'''平台测试中
-    QQ：81300697
-    回复1：获取泛亚有色金属最新资金配比情况
-    回复2：绑定管理账号'''
+QQ：81300697
+回复1：获取泛亚有色金属最新资金配比情况
+回复2：绑定管理账号'''
     if user != None:
         helperText += u'\n'
         helperText += u'''回复3:获取账户资金
-    回复4:获取近一周自动购买记录'''
-        return helperText
+回复4:获取近一周自动购买记录'''
+    return helperText
 
 
 def message_cash_summary(user):
