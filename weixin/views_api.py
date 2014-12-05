@@ -76,17 +76,20 @@ def format_time(time):
 
 
 def message_task_log(user):
-    res = ''
+    res = u''
 
     fyuserprofile = user.fyuserprofile
     start_time = datetime.datetime.now() - datetime.timedelta(days=7)
     logs = TaskLog.objects.filter(time__gt=start_time, user=user)
-
-    for log in logs:
-        if log.state == 1:
-            res += u'%s,成功购买%d手%s\n' % (format_time(log.time), log.count, log.goodsId)
-        else:
-            res += u'%s,失败,%s\n' % (format_time(log.time), log.message)
+    if logs.count() > 0:
+        res = u'自动购买记录\n'
+        for log in logs:
+            if log.state == 1:
+                res += u'%s,成功购买%d手%s\n' % (format_time(log.time), log.count, log.goodsId)
+            else:
+                res += u'%s,失败,%s\n' % (format_time(log.time), log.message)
+    else:
+        res = u'无自动购买记录'
 
     return res
 
