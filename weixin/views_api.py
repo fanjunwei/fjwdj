@@ -104,6 +104,12 @@ def message_cash_summary(user):
         checked, cash_summary = fy_api.cash_summary(user.fyuserprofile.get_fy_username(),
                                                     user.fyuserprofile.get_fy_password())
         if checked:
+            res += u'期初资金:%s\n' % fy_api.format_money(cash_summary.get('initialBalance'))
+            res += u'期末资金:%s\n' % fy_api.format_money(cash_summary.get('currentBalance'))
+            res += u'应追加资金:%s\n' % fy_api.format_money(cash_summary.get('depositExpected'))
+            res += u'当日入金:%s\n' % fy_api.format_money(cash_summary.get('deposit'))
+            res += u'当日出金:%s\n' % fy_api.format_money(cash_summary.get('withdrawal'))
+            res += u'可出资金:%s\n' % fy_api.format_money(cash_summary.get('withdrawable'))
             res += u'资金权益:%s\n' % fy_api.format_money(cash_summary.get('cashValue'))
             res += u'货物权益:%s\n' % fy_api.format_money(cash_summary.get('goodsValue'))
         else:
