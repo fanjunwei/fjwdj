@@ -10,8 +10,8 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^fy/', include('fy.urls')),
-    url(r'^weixin/', include('weixin.urls')),
+    url(r'^fy/', include('fy.urls',namespace='fy')),
+    url(r'^weixin/', include('weixin.urls',namespace='weixin')),
     url(r'^$', 'fy.views.home', name='home'),
     url(r'^fyadmin/', include('FYAdmin.urls',namespace='fyadmin')),
 )

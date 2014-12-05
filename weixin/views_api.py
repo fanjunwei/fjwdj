@@ -15,9 +15,9 @@ TOKEN = "pibgrj1409810714"
 
 
 def handleRequest(request):
-    signature = request.GET.get("signature", None)
-    timestamp = request.GET.get("timestamp", None)
-    nonce = request.GET.get("nonce", None)
+    signature = request.GET.get("signature", '')
+    timestamp = request.GET.get("timestamp", '')
+    nonce = request.GET.get("nonce", '')
     wechat = WechatBasic(token=TOKEN)
     if request.method == 'GET':
         echoStr = request.GET.get("echostr", None)
