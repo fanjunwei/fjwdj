@@ -80,7 +80,7 @@ def message_task_log(user):
 
     fyuserprofile = user.fyuserprofile
     start_time = datetime.datetime.now() - datetime.timedelta(days=7)
-    logs = TaskLog.objects.filter(time__gt=start_time, user=user)
+    logs = TaskLog.objects.filter(time__gt=start_time, user=user).order_by('time')
     if logs.count() > 0:
         res = u'自动购买记录\n'
         for log in logs:
