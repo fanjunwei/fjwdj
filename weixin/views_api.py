@@ -122,8 +122,8 @@ def message_cash_summary(user):
 
 
 def format_time(time):
-    now = datetime.datetime.now()
-    timedelta = now - time
+    today = datetime.date.today()
+    timedelta = today - time.date()
     if timedelta.days == 0:
         return u'今天%s' % (time.strftime('%H:%M:%S'))
     if timedelta.days == 1:
