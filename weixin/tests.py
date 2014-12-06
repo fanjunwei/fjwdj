@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from FYAdmin.models import FYUserProfile, TaskLog
+from weixin.views_api import format_time
 
 __author__ = u'范俊伟'
 
@@ -64,7 +65,7 @@ def create_test_task_log(user):
 
 
 class ViewTest(TestCase):
-    def test(self):
+    def test1(self):
         username = 'fanjunwei'
         passowrd = '123'
         user, profile = register(username, passowrd, '', '')
@@ -78,6 +79,10 @@ class ViewTest(TestCase):
             'password': passowrd,
         }
         response = self.client.post(url, data)
-        #print response
+        # print response
         send_to_weixin_api(self.client, '3')
+
+    def test2(self):
+        test_time=datetime.datetime(2014,12,5,19,0,0)
+        print format_time(test_time)
 
