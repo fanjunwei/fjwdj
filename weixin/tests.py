@@ -13,6 +13,8 @@ __author__ = u'范俊伟'
 
 message_id = 0
 
+openid = 'sfdf33sdfdf'
+
 
 def get_signature(token, timestamp, nonce):
     tmp_list = [token, timestamp, nonce]
@@ -44,12 +46,12 @@ def send_to_weixin_api(client, content):
     signature = get_signature(TOKEN, timestamp, nonce)
     data = '''<xml>
 <ToUserName><![CDATA[1232dfdfd]]></ToUserName>
-<FromUserName><![CDATA[sfdf33sdfdf]]></FromUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
 <CreateTime>1348831860</CreateTime>
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
 <MsgId>%d</MsgId>
-</xml>''' % (content, message_id)
+</xml>''' % (openid, content, message_id)
     url = reverse('weixin:handleRequest') + "?timestamp=%s&nonce=%s&signature=%s" % (timestamp, nonce, signature)
     response = client.generic('POST', url, data, content_type='application/xml')
     print response
@@ -63,11 +65,19 @@ def create_test_task_log(user):
 
 class ViewTest(TestCase):
     def test(self):
-        user, profile = register('', '', '', '')
+        username = 'fanjunwei'
+        passowrd = '123'
+        user, profile = register(username, passowrd, '', '')
         create_test_task_log(user)
-        send_to_weixin_api(self.client, '1')
         send_to_weixin_api(self.client, '2')
-        send_to_weixin_api(self.client, 'fanjunwei')
-        send_to_weixin_api(self.client, '123')
+        url = u"%s?openid=%s" % ( reverse('weixin:bind'), openid)
+        response = self.client.get(url)
+        # print response
+        data = {
+            'username': username,
+            'password': passowrd,
+        }
+        response = self.client.post(url, data)
+        #print response
         send_to_weixin_api(self.client, '3')
-        send_to_weixin_api(self.client, '4')
+

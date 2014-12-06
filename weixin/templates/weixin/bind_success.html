@@ -1,0 +1,23 @@
+{% extends 'weixin/base.html' %}
+
+{% block body %}
+
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h2>绑定成功!</h2>
+        </div>
+        <div class="panel-footer">
+            <button onclick="closeWeixinWindow()" class="btn-primary btn">关闭</button>
+        </div>
+    </div>
+    <script>
+        function closeWeixinWindow() {
+            WeixinJSBridge.invoke('closeWindow', {}, function (res) {
+
+                //alert(res.err_msg);
+
+            });
+        }
+    </script>
+{% endblock %}

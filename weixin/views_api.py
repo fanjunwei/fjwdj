@@ -5,6 +5,7 @@ import datetime
 from django.contrib.auth.models import User
 
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from FYAdmin.models import TaskLog
 from fy.fy_query import getFyMoneySupply
 from util import fy_api
@@ -201,9 +202,14 @@ def responseMsg(request, wechat):
                     print str(e)
             elif message.content == '2':
                 if user == None:
-                    weixinUser.current_state = 1
-                    weixinUser.current_sub_state = 0
-                    res = wechat.response_text(u'请输入管理账号,输入#返回主菜单')
+                    # weixinUser.current_state = 1
+                    # weixinUser.current_sub_state = 0
+                    host = request.META.get('HTTP_HOST', '')
+                    url = u"http://%s%s?openid=%s" % (host, reverse('weixin:bind'), message.source)
+                    res = wechat.response_news([{
+                                                    'title': u'点击进入账号绑定',
+                                                    'url': url,
+                                                }])
                 else:
                     weixinUser.current_state = 2
                     weixinUser.current_sub_state = 0
