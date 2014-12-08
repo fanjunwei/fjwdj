@@ -172,7 +172,7 @@ def message_consolidated(user):
                 message = u'无数据'
 
         else:
-            message = u'未设置泛亚账户'
+            message = res
     else:
         message = u'未设置泛亚账户'
 
