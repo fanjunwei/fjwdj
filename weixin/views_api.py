@@ -13,7 +13,7 @@ from wechat_sdk import WechatBasic
 from django.http import HttpResponse
 from weixin.models import WeiXinUser, WeiXinMessage
 from django.contrib.auth import authenticate, get_user_model
-
+from django.utils.translation import ugettext as _
 TOKEN = "pibgrj1409810714"
 
 
@@ -128,6 +128,8 @@ def format_time(time):
         return u'今天%s' % (time.strftime('%H:%M:%S'))
     if timedelta.days == 1:
         return u'昨天%s' % (time.strftime('%H:%M:%S'))
+    if timedelta.days <7:
+        return "%s %s"%(_(time.strftime('%a')),time.strftime('%H:%M:%S'))
     else:
         return time.strftime('%Y-%m-%d %H:%M:%S')
 
