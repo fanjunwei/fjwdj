@@ -86,7 +86,7 @@ def admin_view_decorator(func):
                 return False
 
         def inner(request, *args, **kwargs):
-            if not has_permission(request) and getattr(view, 'need_site_permission', True):
+            if not has_permission(request) and getattr(cls, 'need_site_permission', True):
                 return LoginView.as_view()(request, *args, **kwargs)
             return view(request, *args, **kwargs)
 
@@ -159,10 +159,6 @@ class RegisterView(BaseView):
     need_site_permission = False
     template_name = 'fyadmin/register.html'
 
-
-    @classonlymethod
-    def as_view(cls, **initkwargs):
-        return super(BaseView, cls).as_view(**initkwargs)
 
     def post(self, request, *args, **kwargs):
         self.form = RegisterForm(request=request, data=request.POST)
