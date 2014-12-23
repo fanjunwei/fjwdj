@@ -7,22 +7,17 @@ from django.utils.decorators import classonlymethod
 from django.views.generic import View
 from django.views.decorators.cache import never_cache
 from functools import update_wrapper
+from android.auth2 import getAuth2Token
 
 INVALID_LOGIN_PARAMETERS = 101
 SESSION_TOKEN_ERROR_PARAMETERS = 102
 
 
 def no_login_error(request, *args, **kwargs):
-    if request.hasRestSessionToken:
-        data = {
-            'code': SESSION_TOKEN_ERROR_PARAMETERS,
-            'error': '未登录',
-        }
-    else:
-        data = {
-            'code': INVALID_LOGIN_PARAMETERS,
-            'error': '未登录',
-        }
+    data = {
+        'code': INVALID_LOGIN_PARAMETERS,
+        'error': '未登录',
+    }
     return http.HttpResponseNotFound(json.dumps(data))
 
 
@@ -50,16 +45,6 @@ def login_view_decorator(func):
 
 class JsonMixin(object):
     def get_context_data(self, **kwargs):
-        self.request.session['test'] = 'test'
-        session_key = self.request.session.session_key
-        if session_key:
-            kwargs['sessionToken'] = session_key
-        else:
-            self.request.session['gen'] = 'gen'
-            self.request.session.save()
-            session_key = self.request.session.session_key
-            if session_key:
-                kwargs['sessionToken'] = session_key
         return kwargs
 
     def render_to_response(self, context):
@@ -117,6 +102,7 @@ class LoginView(JsonView):
                 kwargs.update({
                     'username': user.username,
                     'nickname': user.first_name,
+                    'authToken': getAuth2Token(user)
                 })
         else:
             return self.response_error(INVALID_LOGIN_PARAMETERS, u'用户名和密码不能为空')

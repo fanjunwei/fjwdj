@@ -44,14 +44,15 @@ INSTALLED_APPS = (
     'fy',
     'weixin',
     'FYAdmin',
+    'android',
 )
 
 MIDDLEWARE_CLASSES = (
-    'android.middleware.AndroidAuthMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'android.middleware.AndroidAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
