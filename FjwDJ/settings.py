@@ -47,6 +47,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'android.middleware.AndroidAuthMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
@@ -133,7 +134,7 @@ LOGGING = {
         },
         'task': {
             'level': 'INFO',
-            #'class': 'logging.handlers.TimedRotatingFileHandler',
+            # 'class': 'logging.handlers.TimedRotatingFileHandler',
             #'filename': '/var/log/fy_django/task.log',
             'class': 'logging.StreamHandler',
             #'class': 'django.utils.log.NullHandler',

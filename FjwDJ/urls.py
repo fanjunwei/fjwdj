@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^weixin/', include('weixin.urls',namespace='weixin')),
     url(r'^$', 'fy.views.home', name='home'),
     url(r'^fyadmin/', include('FYAdmin.urls',namespace='fyadmin')),
+    url(r'^android/', include('android.urls',namespace='android')),
 )
