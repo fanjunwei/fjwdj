@@ -23,22 +23,37 @@
         <label class="col-sm-2 control-label">选择货物</label>
 
         <div class="col-sm-10 controls">
+
             {% for goods in height_goods_list %}
-                <label>
-                    <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
-                            {% if goods.selected %}
-                           checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
-                </label>
-                <br>
+                <div class="row" style="border-bottom: solid #f9f9f9">
+                    <div class="col-md-3">
+                        <label>
+                            <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
+                                    {% if goods.selected %}
+                                   checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
+
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        可申报:{{ goods.limit }}
+                    </div>
+                </div>
             {% endfor %}
             <br>
             {% for goods in normal_goods_list %}
-                <label>
-                    <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
-                            {% if goods.selected %}
-                           checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
-                </label>
-                <br>
+                <div class="row" style="border-bottom: solid #f9f9f9">
+                    <div class="col-md-3">
+                        <label>
+                            <input type="checkbox" value="{{ goods.goodsId }}" id="goodsId" name="goodsId"
+                                    {% if goods.selected %}
+                                   checked="checked" {% endif %}> {{ goods.goodsName }}{{ goods.goodsId }}
+
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        可申报:{{ goods.limit }}
+                    </div>
+                </div>
             {% endfor %}
         </div>
 

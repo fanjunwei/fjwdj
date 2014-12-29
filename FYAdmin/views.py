@@ -694,6 +694,11 @@ class TaskEditView(FrameView):
                     item['goodsId'] = goodsId
                     item['goodsName'] = goodsName
                     item['selected'] = selected
+                    checked, limit = fy_api.trading_limit(self.request.user.fyuserprofile.get_fy_username(),
+                                                          self.request.user.fyuserprofile.get_fy_password(),
+                                                          goodsId)
+                    if checked:
+                        item['limit'] = limit
                     if goodsId in height_goodsIds:
                         height_goods_list.append(item)
                     else:
