@@ -16,7 +16,7 @@ class Auth2(models.Model):
 
 
 def get_new_auth2_token():
-    "Returns session key that isn't being used."
+    token_key = None
     while True:
         token_key = get_random_string(32, VALID_KEY_CHARS)
         if not Auth2.objects.filter(token=token_key).exists():
