@@ -5,6 +5,7 @@
 import json
 import requests
 from django.core.cache import cache
+from requests.exceptions import ConnectTimeout
 
 __author__ = u'范俊伟'
 
@@ -103,32 +104,37 @@ def all_googds():
     exclude_goodsId = ['TS100', 'TS200', 'TS500', 'TS1000']
     cache_key = 'all_googds'
     data = cache.get(cache_key)
-    if data == None:
-        url = 'http://118.145.29.68:16850/quotation/quotecast/report_trading_market_all_prices'
-        data = {'_language_': 'zh'}
-        r = requests.post(url, data=data, verify=False)
-        res_json = json.loads(r.text)
-        params = res_json.get('params', {})
-        tables = res_json.get('tables')
-        error_message = params.get('_message_', '')
-        if error_message:
-            return False, error_message
-        else:
-            res = []
-            columns = tables.get('goods', {}).get('columns', None)
-            if columns:
-                rows = tables.get('goods', {}).get('rows', None)
-                if rows:
-                    for row in rows:
-                        item = {}
-                        for i in range(0, len(row)):
-                            item[columns[i]] = row[i]
-                        if not item.get('goodsId') in exclude_goodsId:
-                            res.append(item)
-            data = res
-            cache.set(cache_key, data, 3600)
+    try:
+        if data == None:
+            url = 'http://118.145.29.68:16850/quotation/quotecast/report_trading_market_all_prices'
+            data = {'_language_': 'zh'}
+            r = requests.post(url, data=data, verify=False, timeout=(5, 27))
+            res_json = json.loads(r.text)
+            params = res_json.get('params', {})
+            tables = res_json.get('tables')
+            error_message = params.get('_message_', '')
+            if error_message:
+                return False, error_message
+            else:
+                res = []
+                columns = tables.get('goods', {}).get('columns', None)
+                if columns:
+                    rows = tables.get('goods', {}).get('rows', None)
+                    if rows:
+                        for row in rows:
+                            item = {}
+                            for i in range(0, len(row)):
+                                item[columns[i]] = row[i]
+                            if not item.get('goodsId') in exclude_goodsId:
+                                res.append(item)
+                data = res
+                cache.set(cache_key, data, 3600)
 
-    return True, data
+        return True, data
+    except ConnectTimeout:
+        return False, '连接超时'
+    except Exception, e:
+        return False, str(e)
 
 
 def get_money_info(goodsId, goodsName):
