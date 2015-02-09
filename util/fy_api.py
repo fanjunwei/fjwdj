@@ -9,13 +9,19 @@ from requests.exceptions import ConnectTimeout
 
 __author__ = u'范俊伟'
 
+CONNECT_TIMEOUT = 5
+READ_TIMEOUT = 27
+
 
 def login(username, password):
     url = 'https://118.145.29.67:16831/portal/member/report_account_info'
     data = {'_password_': password,
             'merchantId': username,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     res_json = json.loads(r.text)
 
     status = res_json.get('params', {}).get('status', None)
@@ -37,7 +43,10 @@ def cash_summary(username, password):
     data = {'_password_': password,
             'merchantId': username,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False, timeout=5)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     if r.ok:
         res_json = json.loads(r.text)
         params = res_json.get('params', {})
@@ -61,7 +70,10 @@ def pending_orders(username, password):
     data = {'_password_': password,
             'merchantId': username,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     res_json = json.loads(r.text)
     params = res_json.get('params', {})
     tables = res_json.get('tables')
@@ -90,7 +102,10 @@ def cancel_order(username, password, orderId):
             'merchantId': username,
             'orderId': orderId,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     res_json = json.loads(r.text)
     params = res_json.get('params', {})
     error_message = params.get('_message_', '')
@@ -108,7 +123,7 @@ def all_googds():
         if data == None:
             url = 'http://118.145.29.68:16850/quotation/quotecast/report_trading_market_all_prices'
             data = {'_language_': 'zh'}
-            r = requests.post(url, data=data, verify=False, timeout=(5, 27))
+            r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
             res_json = json.loads(r.text)
             params = res_json.get('params', {})
             tables = res_json.get('tables')
@@ -148,7 +163,10 @@ def get_money_info(goodsId, goodsName):
     # js = json.loads(data)
     url = 'http://118.145.29.68:16850/quotation/quotecast/report_financing_market_digest'
     data = {'goodsId': goodsId}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     js = json.loads(r.text)
     params = js.get('params', {})
     error_message = params.get('_message_', '')
@@ -258,7 +276,10 @@ def trading_limit(username, password, goodsId, my_type='money_begin', for_cache=
                 'action': action,
                 'isSelling': isSelling,
                 '_language_': 'zh'}
-        r = requests.post(url, data=data, verify=False)
+        try:
+            r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+        except ConnectTimeout:
+            return False, '连接超时'
         res_json = json.loads(r.text)
         params = res_json.get('params', {})
         error_message = params.get('_message_', '')
@@ -310,7 +331,10 @@ def submit_order(username, password, goodsId, order_count, my_type='money_begin'
             'type': 'LIMIT',
             'style': 'NORMAL',
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     res_json = json.loads(r.text)
     params = res_json.get('params', {})
     error_message = params.get('_message_', '')
@@ -370,7 +394,10 @@ def consolidated(username, password):
     data = {'_password_': password,
             'merchantId': username,
             '_language_': 'zh'}
-    r = requests.post(url, data=data, verify=False)
+    try:
+        r = requests.post(url, data=data, verify=False, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+    except ConnectTimeout:
+        return False, '连接超时'
     res_json = json.loads(r.text)
     params = res_json.get('params', {})
     tables = res_json.get('tables')
