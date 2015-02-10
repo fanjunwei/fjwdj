@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from weixin.models import WeiXinUser, WeiXinMessage
 from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import ugettext as _
+
 TOKEN = "pibgrj1409810714"
 
 
@@ -128,8 +129,8 @@ def format_time(time):
         return u'今天%s' % (time.strftime('%H:%M:%S'))
     if timedelta.days == 1:
         return u'昨天%s' % (time.strftime('%H:%M:%S'))
-    if timedelta.days <7:
-        return "%s %s"%(_(time.strftime('%a')),time.strftime('%H:%M:%S'))
+    if timedelta.days < 7:
+        return "%s %s" % (_(time.strftime('%a')), time.strftime('%H:%M:%S'))
     else:
         return time.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -144,7 +145,10 @@ def message_task_log(user):
         res = u'自动购买记录\n'
         for log in logs:
             if log.state == 1:
-                res += u'%s,成功购买%d手%s\n' % (format_time(log.time), log.count, log.goodsId)
+                log_message = log.message
+                if not log_message:
+                    log_message = u''
+                res += u'%s,成功购买%d手%s,%s\n' % (format_time(log.time), log.count, log.goodsId, log_message)
             else:
                 res += u'%s,失败,%s\n' % (format_time(log.time), log.message)
     else:

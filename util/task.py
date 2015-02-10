@@ -139,7 +139,9 @@ def order_for_user(user_pro, goods_sorter):
                             checked, errorMessage = fy_api.submit_order(fy_username, fy_password, goodsId, limit)
                             ordered = True
                             if checked:
-                                TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit)
+                                TaskLog.objects.create(user=user_pro.user, state=1, goodsId=goodsId, count=limit,
+                                                       message='配比:%s%%,价格:%s' % (
+                                                       goods.get('ratio_format'), goods.get('recommendation')))
                             else:
                                 TaskLog.objects.create(user=user_pro.user, state=0, goodsId=goodsId, count=limit,
                                                        message=errorMessage)
